@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-harness-will/desktop",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A portable desktop distribution of DeepSeek Harness with opt-in Will customizations",
   "author": "DeepSeek Harness Will contributors",
   "private": true,
@@ -44,7 +44,7 @@
   },
   "build": {
     "appId": "org.deepseek-harness-will.desktop",
-    "productName": "DeepSeek Harness Will",
+    "productName": "Deepseek Harness Will — 组装未来",
     "asar": true,
     "asarUnpack": [
       "node_modules/**/*.node",

@@ -154,8 +154,8 @@ jobs:
 
       - name: Verify packaged macOS application
         run: |
-          bundle="apps/will-desktop/release/${{ matrix.output_dir }}/DeepSeek Harness Will.app"
-          executable="$bundle/Contents/MacOS/DeepSeek Harness Will"
+          bundle="apps/will-desktop/release/${{ matrix.output_dir }}/Deepseek Harness Will — 组装未来.app"
+          executable="$bundle/Contents/MacOS/Deepseek Harness Will — 组装未来"
           runtime="$bundle/Contents/Resources/runtime/node/bin/node"
           plist="$bundle/Contents/Info.plist"
 
@@ -172,7 +172,8 @@ jobs:
           test "$("$runtime" --version)" = "v$NODE_VERSION"
 
           test "$(plutil -extract CFBundleIdentifier raw -o - "$plist")" = 'org.deepseek-harness-will.desktop'
-          test "$(plutil -extract CFBundleShortVersionString raw -o - "$plist")" = '0.1.2'
+          expected_version="$(node -p "require('./apps/will-desktop/package.json').version")"
+          test "$(plutil -extract CFBundleShortVersionString raw -o - "$plist")" = "$expected_version"
           test "$(plutil -extract LSMinimumSystemVersion raw -o - "$plist")" = '12.0'
 
       - uses: actions/upload-artifact@v4
@@ -203,4 +204,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME#will-v}"
-          gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --notes-file .github/release-notes/current.txt --title "DeepSeek Harness Will v$version"
+          gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --notes-file .github/release-notes/current.txt --title "Deepseek Harness Will — 组装未来 v$version"

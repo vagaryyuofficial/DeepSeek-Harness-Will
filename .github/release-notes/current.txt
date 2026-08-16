@@ -1,6 +1,8 @@
-DeepSeek Harness Will v0.1.2 adds the first formal macOS release while retaining the Windows installer and portable edition.
+DeepSeek Harness Will v0.1.3 adopts the bilingual application name Deepseek Harness Will — 组装未来 across Windows and macOS while retaining the established repository and artifact names.
 
 Highlights:
+- The installed application, window, tray, notification, and shortcut name is Deepseek Harness Will — 组装未来.
+- Existing installed and portable data directories remain compatible across the name change.
 - Apple Silicon (arm64) and Intel (x64) DMGs for macOS 12 or later.
 - Native macOS traffic-light window controls, template tray icon, and persistent login-shell terminal.
 - Architecture-matched, checksum-verified Node/npm runtime in every Windows and macOS package.

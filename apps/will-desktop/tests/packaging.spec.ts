@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 interface DesktopManifest {
   version: string
   build: {
+    productName: string
     nsis: { artifactName: string }
     portable: { artifactName: string }
     mac: {
@@ -21,7 +22,8 @@ describe('desktop packaging', () => {
       readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8'),
     ) as DesktopManifest
 
-    expect(manifest.version).toBe('0.1.2')
+    expect(manifest.version).toBe('0.1.3')
+    expect(manifest.build.productName).toBe('Deepseek Harness Will — 组装未来')
     expect(manifest.build.nsis.artifactName).toContain('Setup')
     expect(manifest.build.portable.artifactName).toContain('Portable')
     expect(manifest.build.nsis.artifactName).not.toBe(manifest.build.portable.artifactName)

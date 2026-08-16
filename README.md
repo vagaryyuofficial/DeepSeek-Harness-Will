@@ -1,24 +1,25 @@
-# DeepSeek Harness Will
+# Deepseek Harness Will — 组装未来
 
 English | [中文](README.zh.md)
 
 <p align="center">
-  <img src="apps/will-desktop/assets/icon.png" alt="DeepSeek Harness Will icon" width="128" height="128">
+  <img src="apps/will-desktop/assets/icon.png" alt="Deepseek Harness Will — 组装未来 application icon" width="128" height="128">
 </p>
 
-DeepSeek Harness Will is an **unofficial, community-maintained desktop distribution** of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It packages the official `dsh web` profile as a Windows and macOS application, then adds opt-in desktop features without changing the upstream default theme.
+**Deepseek Harness Will — 组装未来** is an **unofficial, community-maintained desktop distribution** of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). It packages the official `dsh web` profile as a Windows and macOS application, then adds opt-in desktop features without changing the upstream default theme.
 
 This project is not affiliated with or endorsed by DeepSeek. DeepSeek Harness remains in developer preview, so compatibility-breaking upstream changes are expected.
 
 ## Problem it solves
 
-The official Web profile is designed for developers who can install Node.js, run a command, and keep a browser tab open. Will turns that workflow into a double-click desktop app with its own verified Node/npm runtime, persistent background process, native window controls, tray residency, settings UI, and release packages. Users can operate the official Harness UI without maintaining a separate Node.js installation or browser session.
+The official Web profile is designed for developers who can install Node.js, run a command, and keep a browser tab open. Deepseek Harness Will — 组装未来 turns that workflow into a double-click desktop app with its own verified Node/npm runtime, persistent background process, native window controls, tray residency, settings UI, and release packages. Users can operate the official Harness UI without maintaining a separate Node.js installation or browser session.
 
 ## Main features
 
 | Capability | Status | Implementation |
 |---|---|---|
 | Windows and macOS packages | Implemented | Windows 10/11 x64 installer and portable executable; macOS 12+ DMGs for Apple Silicon and Intel. |
+| Application name | Implemented | The installed application, window, tray, notification, and shortcut name is **Deepseek Harness Will — 组装未来**; the repository and release artifact names remain DeepSeek Harness Will. |
 | No user-installed Node.js | Implemented | Electron runs the bundled agent; releases also carry a checksum-verified Node/npm distribution for agent overlay updates. |
 | Native desktop window | Implemented | Windows uses custom frameless chrome; macOS uses native inset traffic-light controls. Both support single-instance behavior and tray residency. |
 | Portable mode | Windows | The portable executable stores data in `DeepSeek-Harness-Will-Data` beside the executable. macOS uses the installed application data directory. |
@@ -61,17 +62,17 @@ Download artifacts from the repository's [GitHub Releases](https://github.com/va
 ### macOS 12 or later
 
 1. Choose `DeepSeek-Harness-Will-<version>-macOS-arm64.dmg` for Apple Silicon (M1 or later), or `DeepSeek-Harness-Will-<version>-macOS-x64.dmg` for an Intel Mac.
-2. Open the DMG and drag **DeepSeek Harness Will** to **Applications**.
+2. Open the DMG and drag **Deepseek Harness Will — 组装未来** to **Applications**.
 3. Open the application from **Applications**. The current builds are unsigned and not notarized; on first launch, Control-click the app and choose **Open**, or approve it in **System Settings → Privacy & Security** after verifying that it came from this repository.
 
 <a id="run"></a>
 
 ## Usage
 
-1. Start **DeepSeek Harness Will**.
+1. Start **Deepseek Harness Will — 组装未来**.
 2. In the official **Settings → Models** page, choose a model and save the required API key.
 3. Enter a task in the official chat composer and follow the streamed response, tool calls, terminal output, and file diff cards.
-4. Open **Will Settings** in the title bar to select a skin, edit `soul.md`, manage plugins, use the persistent terminal, check balance, or configure desktop behavior.
+4. Open **组装未来设置** in the title bar to select a skin, edit `soul.md`, manage plugins, use the persistent terminal, check balance, or configure desktop behavior.
 5. Closing the window keeps the app in the tray when **close to tray** is enabled; use the tray menu to return or quit.
 
 ### Input and output examples
@@ -123,7 +124,7 @@ GitHub Actions builds Windows x64, macOS Apple Silicon, and macOS Intel artifact
 
 ## Data and updates
 
-- Installed mode uses Electron's per-user application data directory.
+- Installed mode retains the existing per-user `DeepSeek Harness Will` data directory so upgrading to the `Deepseek Harness Will — 组装未来` display name does not hide prior settings or sessions.
 - Windows portable mode uses `DeepSeek-Harness-Will-Data` beside the executable.
 - The dsh home, Will preferences, `soul.md`, terminal state, and agent overlays live below the selected root.
 - Agent updates install into staging, run `dsh --version`, rotate `current`/`previous`, and restart. A failed restart restores the previous overlay.

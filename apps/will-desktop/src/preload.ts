@@ -1,6 +1,7 @@
 /** Isolated renderer bridge and opt-in Will desktop control center. */
 
 import { ipcRenderer } from 'electron'
+import { APP_CONTROL_CENTER_TITLE, APP_DISPLAY_NAME, APP_SETTINGS_LABEL } from './branding.ts'
 import type {
   BalanceResult, ClientUpdateResult, DesktopSettings, DesktopState, OperationStatus, TerminalSnapshot,
 } from './contracts.ts'
@@ -179,7 +180,7 @@ function createTitlebar(): { balance: HTMLButtonElement; status: HTMLElement; se
   titlebar.id = 'will-titlebar'
   const brand = document.createElement('div')
   brand.className = 'will-brand'
-  brand.innerHTML = '<span class="will-mark">W</span><span class="will-brand-text">DeepSeek Harness Will</span>'
+  brand.innerHTML = `<span class="will-mark">W</span><span class="will-brand-text">${APP_DISPLAY_NAME}</span>`
   const status = document.createElement('span')
   status.className = 'will-status'
   status.textContent = '正在连接…'
@@ -190,7 +191,7 @@ function createTitlebar(): { balance: HTMLButtonElement; status: HTMLElement; se
   const balance = button('余额 …', 'will-title-button')
   balance.id = 'will-balance'
   balance.title = '刷新 DeepSeek API 余额'
-  const settings = button('Will 设置', 'will-title-button')
+  const settings = button(APP_SETTINGS_LABEL, 'will-title-button')
   actions.append(balance, settings)
 
   const controls = document.createElement('div')
@@ -236,7 +237,7 @@ async function createControlCenter(
   const head = document.createElement('div')
   head.className = 'will-panel-head'
   const title = document.createElement('h2')
-  title.textContent = 'Will 控制中心'
+  title.textContent = APP_CONTROL_CENTER_TITLE
   const closeButton = button('关闭')
   closeButton.addEventListener('click', close)
   head.append(title, closeButton)

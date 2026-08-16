@@ -9,6 +9,7 @@ import {
 } from 'electron'
 import updater from 'electron-updater'
 import { updateAgentOverlay, hasBundledNodeRuntime } from './agent-update.ts'
+import { APP_DISPLAY_NAME, LEGACY_USER_DATA_DIRECTORY } from './branding.ts'
 import type {
   ClientUpdateResult, DesktopSettings, DesktopState, OperationStatus, WindowAction,
 } from './contracts.ts'
@@ -24,13 +25,14 @@ import { PersistentTerminal } from './terminal.ts'
 const { autoUpdater } = updater
 const PORTABLE_DIR = process.env.PORTABLE_EXECUTABLE_DIR?.trim()
 const EXPLICIT_DATA_DIR = process.env.WILL_DATA_DIR?.trim()
+app.setName(APP_DISPLAY_NAME)
 const selectedDataDir = PORTABLE_DIR !== undefined && PORTABLE_DIR !== ''
   ? join(PORTABLE_DIR, 'DeepSeek-Harness-Will-Data')
-  : EXPLICIT_DATA_DIR
-if (selectedDataDir !== undefined && selectedDataDir !== '') {
-  mkdirSync(selectedDataDir, { recursive: true, mode: 0o700 })
-  app.setPath('userData', selectedDataDir)
-}
+  : EXPLICIT_DATA_DIR !== undefined && EXPLICIT_DATA_DIR !== ''
+    ? EXPLICIT_DATA_DIR
+    : join(app.getPath('appData'), LEGACY_USER_DATA_DIRECTORY)
+mkdirSync(selectedDataDir, { recursive: true, mode: 0o700 })
+app.setPath('userData', selectedDataDir)
 
 if (!app.requestSingleInstanceLock()) app.exit(0)
 
@@ -110,6 +112,7 @@ function createWindow(): BrowserWindow {
     height: 920,
     minWidth: 980,
     minHeight: 640,
+    title: APP_DISPLAY_NAME,
     frame: isMac,
     ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 } } : {}),
     show: false,
@@ -122,6 +125,10 @@ function createWindow(): BrowserWindow {
     },
   })
   window.removeMenu()
+  window.on('page-title-updated', (event) => {
+    event.preventDefault()
+    window.setTitle(APP_DISPLAY_NAME)
+  })
   window.once('ready-to-show', () => { window.show() })
   window.on('close', (event) => {
     if (quitting || !settings.closeToTray) return
@@ -152,7 +159,7 @@ async function trayImage() {
 function refreshTrayMenu(): void {
   if (tray === undefined) return
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: '显示 DeepSeek Harness Will', click: () => { mainWindow.show(); mainWindow.focus() } },
+    { label: `显示 ${APP_DISPLAY_NAME}`, click: () => { mainWindow.show(); mainWindow.focus() } },
     { label: latestStatus.message, enabled: false },
     { type: 'separator' },
     { label: '退出', click: () => { quitting = true; app.quit() } },
@@ -161,7 +168,7 @@ function refreshTrayMenu(): void {
 
 async function createTray(): Promise<void> {
   tray = new Tray(await trayImage())
-  tray.setToolTip('DeepSeek Harness Will')
+  tray.setToolTip(APP_DISPLAY_NAME)
   tray.on('click', () => { mainWindow.show(); mainWindow.focus() })
   refreshTrayMenu()
 }
@@ -330,7 +337,7 @@ function setupIpc(): void {
     if (harnessUrl === '' || event.senderFrame === null
       || new URL(event.senderFrame.url).origin !== new URL(harnessUrl).origin) return
     if (!settings.taskNotifications || mainWindow.isFocused() || !Notification.isSupported()) return
-    const notification = new Notification({ title: 'DeepSeek Harness Will', body: 'Agent 任务已完成，点击返回窗口。' })
+    const notification = new Notification({ title: APP_DISPLAY_NAME, body: 'Agent 任务已完成，点击返回窗口。' })
     notification.on('click', () => { mainWindow.show(); mainWindow.focus() })
     notification.show()
   })
@@ -364,6 +371,6 @@ try {
 } catch (error) {
   const message = errorMessage(error)
   status({ kind: 'error', message })
-  await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<h1>DeepSeek Harness Will 启动失败</h1><pre>${message}</pre>`)}`)
+  await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<h1>${APP_DISPLAY_NAME} 启动失败</h1><pre>${message}</pre>`)}`)
   await finishSmokeProbe({ status: 'error', message })
 }

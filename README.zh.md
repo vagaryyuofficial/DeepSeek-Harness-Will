@@ -1,24 +1,25 @@
-# DeepSeek Harness Will
+# Deepseek Harness Will — 组装未来
 
 [English](README.md) | 中文
 
 <p align="center">
-  <img src="apps/will-desktop/assets/icon.png" alt="DeepSeek Harness Will 图标" width="128" height="128">
+  <img src="apps/will-desktop/assets/icon.png" alt="Deepseek Harness Will — 组装未来应用图标" width="128" height="128">
 </p>
 
-DeepSeek Harness Will 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**非官方、社区维护桌面发行版**。它把官方 `dsh web` profile 封装为 Windows 与 macOS 应用，并在不改变上游默认主题的前提下加入可选桌面功能。
+**Deepseek Harness Will — 组装未来**是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**非官方、社区维护桌面发行版**。它把官方 `dsh web` profile 封装为 Windows 与 macOS 应用，并在不改变上游默认主题的前提下加入可选桌面功能。
 
 本项目与 DeepSeek 没有关联，也未得到其背书。DeepSeek Harness 仍处于开发者预览阶段，上游可能发生破坏兼容性的变更。
 
 ## 项目解决什么问题
 
-官方 Web profile 面向能够安装 Node.js、运行命令并持续打开浏览器标签页的开发者。Will 将这套流程封装为双击即用的桌面应用，内置经过校验的 Node/npm 运行时、持久后台进程、原生窗口控制、系统托盘、设置界面和发行安装包。用户无需维护独立 Node.js 环境或浏览器会话，也能使用官方 Harness 界面。
+官方 Web profile 面向能够安装 Node.js、运行命令并持续打开浏览器标签页的开发者。Deepseek Harness Will — 组装未来将这套流程封装为双击即用的桌面应用，内置经过校验的 Node/npm 运行时、持久后台进程、原生窗口控制、系统托盘、设置界面和发行安装包。用户无需维护独立 Node.js 环境或浏览器会话，也能使用官方 Harness 界面。
 
 ## 主要功能
 
 | 能力 | 状态 | 实现方式 |
 |---|---|---|
 | Windows 与 macOS 安装包 | 已实现 | Windows 10/11 x64 安装版与便携版；macOS 12+ Apple Silicon 与 Intel 双架构 DMG。 |
+| 应用名称 | 已实现 | 安装后的应用、窗口、托盘、通知和快捷方式统一显示**Deepseek Harness Will — 组装未来**；仓库与发行文件名保留 DeepSeek Harness Will。 |
 | 用户免装 Node.js | 已实现 | Electron 运行内置 agent；发行包还携带经过 checksum 校验的 Node/npm，供 agent overlay 更新使用。 |
 | 原生桌面窗口 | 已实现 | Windows 使用定制无边框窗口栏；macOS 使用原生内嵌红黄绿按钮；两端均支持单实例与托盘常驻。 |
 | 便携模式 | Windows | 便携版在 exe 同目录的 `DeepSeek-Harness-Will-Data` 保存数据；macOS 使用安装模式的应用数据目录。 |
@@ -61,17 +62,17 @@ flowchart LR
 ### macOS 12 或更高版本
 
 1. Apple Silicon（M1 或更新机型）选择 `DeepSeek-Harness-Will-<version>-macOS-arm64.dmg`；Intel Mac 选择 `DeepSeek-Harness-Will-<version>-macOS-x64.dmg`。
-2. 打开 DMG，将 **DeepSeek Harness Will** 拖入 **应用程序**。
+2. 打开 DMG，将**Deepseek Harness Will — 组装未来**拖入**应用程序**。
 3. 从 **应用程序** 打开。本项目当前尚未签名和公证；首次启动前请确认文件来自本仓库，然后按住 Control 点击应用并选择**打开**，或在 **系统设置 → 隐私与安全性**中批准打开。
 
 <a id="run"></a>
 
 ## 使用方法
 
-1. 启动 **DeepSeek Harness Will**。
+1. 启动**Deepseek Harness Will — 组装未来**。
 2. 在官方 **Settings → Models** 页面选择模型并保存所需 API 密钥。
 3. 在官方对话输入框提交任务，查看流式回复、工具调用、终端输出和文件 diff 卡片。
-4. 点击标题栏 **Will 设置**，选择皮肤、编辑 `soul.md`、管理插件、使用持久终端、查询余额或配置桌面行为。
+4. 点击标题栏**组装未来设置**，选择皮肤、编辑 `soul.md`、管理插件、使用持久终端、查询余额或配置桌面行为。
 5. 启用**关闭到托盘**后，关闭窗口不会终止任务；可从托盘菜单返回或退出。
 
 ### 输入输出示例
@@ -123,7 +124,7 @@ GitHub Actions 在对应原生架构 runner 上构建 Windows x64、macOS Apple 
 
 ## 数据与更新
 
-- 安装模式使用 Electron 的系统用户应用数据目录。
+- 安装模式保留原有的系统用户 `DeepSeek Harness Will` 数据目录，因此升级为「Deepseek Harness Will — 组装未来」显示名后不会丢失旧设置或会话。
 - Windows 便携模式使用 exe 同目录的 `DeepSeek-Harness-Will-Data`。
 - dsh home、Will 偏好、`soul.md`、终端状态和 agent overlay 均位于选定根目录下。
 - agent 更新先安装到 staging，执行 `dsh --version`，再轮换 `current`/`previous` 并重启；新版本启动失败会恢复上一 overlay。
