@@ -138,6 +138,7 @@
     "will:dev": "pnpm run build && pnpm --filter @deepseek-harness-will/desktop run dev",
     "will:package:dir": "pnpm run build && pnpm --filter @deepseek-harness-will/desktop run package:dir",
     "will:package:win": "pnpm run build && pnpm --filter @deepseek-harness-will/desktop run package:win",
+    "will:package:mac": "pnpm run build && pnpm --filter @deepseek-harness-will/desktop run package:mac",
     "demo:code-mode": "node scripts/demo-code-mode.mjs",
     "demo:cordis": "node scripts/demo-cordis.mjs",
     "demo:acp": "node --import tsx packages/examples/acp-demo/src/bin.ts --config examples/acp-agent/cordis.yml",

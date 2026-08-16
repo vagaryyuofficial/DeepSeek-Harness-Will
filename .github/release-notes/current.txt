@@ -1,0 +1,12 @@
+DeepSeek Harness Will v0.1.2 adds the first formal macOS release while retaining the Windows installer and portable edition.
+
+Highlights:
+- Apple Silicon (arm64) and Intel (x64) DMGs for macOS 12 or later.
+- Native macOS traffic-light window controls, template tray icon, and persistent login-shell terminal.
+- Architecture-matched, checksum-verified Node/npm runtime in every Windows and macOS package.
+- One release workflow that builds, smoke-tests, and publishes all supported platforms together.
+- Expanded English and Chinese README with installation, usage, and real input/output examples.
+
+Current features include 10 optional UI skins, DeepSeek balance display, soul.md editing, plugin management, persistent terminal sessions, agent update/rollback, close-to-tray behavior, task notifications, and the official Harness model/MCP/session/file-diff UI.
+
+The packages are currently unsigned. Windows may show SmartScreen, and macOS may require Control-click → Open after the download is verified. macOS client updates are manual from GitHub Releases; Windows retains consent-gated client updates.

@@ -451,12 +451,30 @@ importers:
         specifier: ^4.1.8
         version: 4.1.8(@opentelemetry/api@1.9.1)(@types/node@22.20.0)(@vitest/coverage-v8@4.1.8)(jsdom@29.1.1(@noble/hashes@2.3.0))(vite@8.0.16(@types/node@22.20.0)(esbuild@0.25.12)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
     optionalDependencies:
+      '@koromix/koffi-darwin-arm64':
+        specifier: 3.1.1
+        version: 3.1.1
+      '@koromix/koffi-darwin-x64':
+        specifier: 3.1.1
+        version: 3.1.1
       '@koromix/koffi-win32-x64':
         specifier: 3.1.1
         version: 3.1.1
+      '@vscode/ripgrep-darwin-arm64':
+        specifier: 1.18.0
+        version: 1.18.0
+      '@vscode/ripgrep-darwin-x64':
+        specifier: 1.18.0
+        version: 1.18.0
       '@vscode/ripgrep-win32-x64':
         specifier: 1.18.0
         version: 1.18.0
+      node-addon-require-builtin-darwin-arm64:
+        specifier: 0.1.4
+        version: 0.1.4
+      node-addon-require-builtin-darwin-x64:
+        specifier: 0.1.4
+        version: 0.1.4
       node-addon-require-builtin-win32-x64-msvc:
         specifier: 0.1.4
         version: 0.1.4

@@ -2,19 +2,13 @@
 
 import { ipcRenderer } from 'electron'
 import type {
-  BalanceResult, ClientUpdateResult, DesktopSettings, DesktopState, OperationStatus,
+  BalanceResult, ClientUpdateResult, DesktopSettings, DesktopState, OperationStatus, TerminalSnapshot,
 } from './contracts.ts'
 import {
   NATIVE_THEME_ID, WILL_THEMES, WILL_THEME_TOKEN_NAMES, resolveWillTheme,
 } from './theme-catalog.ts'
 
 const TITLEBAR_HEIGHT = 42
-
-interface TerminalSnapshot {
-  cwd: string
-  output: string
-  running: boolean
-}
 
 ipcRenderer.on('will:terminal-data', (_event, text: string) => {
   window.dispatchEvent(new CustomEvent<string>('will-terminal-data', { detail: text }))
@@ -75,6 +69,8 @@ function installStyles(): void {
     .will-window-button { width: 46px; height: 100%; border: 0; color: inherit; background: transparent; cursor: pointer; font: 16px/1 system-ui; }
     .will-window-button:hover { background: color-mix(in srgb, var(--dsw-alias-label-primary, white) 12%, transparent); }
     .will-window-button.close:hover { color: white; background: #c42b1c; }
+    html[data-will-platform="darwin"] .will-brand { padding-left: 78px; }
+    html[data-will-platform="darwin"] .will-window-controls { display: none; }
     #will-panel-backdrop { position: fixed; inset: var(--will-titlebar-height) 0 0; z-index: 2147483644; background: rgb(0 0 0 / .42); backdrop-filter: blur(2px); }
     #will-panel {
       position: fixed; z-index: 2147483645; top: calc(var(--will-titlebar-height) + 10px); right: 10px; bottom: 10px; width: min(560px, calc(100vw - 20px));
@@ -316,12 +312,12 @@ async function createControlCenter(
   soul.body.append(editor, soulActions)
   scroll.append(soul.root)
 
-  const terminal = section('持久 PowerShell', '主进程托管，会话目录内运行；关闭设置页或重载 Web 页面都不会终止，重新打开会回放最近 128 KiB 输出。')
+  const terminal = section('持久终端', 'Windows 使用 PowerShell，macOS 使用登录 Shell；关闭设置页或重载 Web 页面都不会终止，重新打开会回放最近 128 KiB 输出。')
   const terminalOutput = document.createElement('pre')
   terminalOutput.className = 'will-terminal'
   const terminalInput = document.createElement('input')
   terminalInput.className = 'will-input will-grow'
-  terminalInput.placeholder = '输入 PowerShell 命令，按 Enter 执行'
+  terminalInput.placeholder = '输入终端命令，按 Enter 执行'
   const runTerminal = button('执行', 'will-button primary')
   const restartTerminal = button('重启终端')
   const scrollTerminal = (): void => { terminalOutput.scrollTop = terminalOutput.scrollHeight }
@@ -337,7 +333,7 @@ async function createControlCenter(
     if (event.key === 'Enter') { event.preventDefault(); void executeTerminal() }
   })
   restartTerminal.addEventListener('click', asyncEvent(async () => {
-    if (!window.confirm('确认结束并重启当前 PowerShell 会话？')) return
+    if (!window.confirm('确认结束并重启当前终端会话？')) return
     try {
       const snapshot = await invoke<TerminalSnapshot>('will:terminal-restart')
       terminalOutput.textContent = snapshot.output
@@ -352,7 +348,7 @@ async function createControlCenter(
   panel.addEventListener('will-dispose', () => { window.removeEventListener('will-terminal-data', terminalData) }, { once: true })
   try {
     const snapshot = await invoke<TerminalSnapshot>('will:terminal-read')
-    terminalOutput.textContent = snapshot.output || `[PowerShell · ${snapshot.cwd}]\n`
+    terminalOutput.textContent = snapshot.output || `[${snapshot.shell} · ${snapshot.cwd}]\n`
   } catch (error) {
     terminalOutput.textContent = escapeText(error)
   }
@@ -472,7 +468,7 @@ async function createControlCenter(
   scroll.append(behavior.root)
 
   const statusSection = section('能力边界', '本版直接复用官方已有的模型设置、会话持久化、文件 diff 和插件 profile；逐文件一键还原、Codex/Claude 自动迁移将在后续桌面原生 provider 中完成。')
-  statusSection.body.innerHTML = '<div class="will-card">已接通：免浏览器桌面运行、原生窗口/托盘、便携数据、10 套皮肤、余额、soul.md、持久 PowerShell、插件安装、agent 更新回退、客户端更新、任务通知。<br>沿用官方：模型选择、MCP 配置、会话文件记录与 diff 展示。</div>'
+  statusSection.body.innerHTML = '<div class="will-card">已接通：免浏览器桌面运行、原生窗口/托盘、便携数据、10 套皮肤、余额、soul.md、持久终端、插件安装、agent 更新回退、客户端更新、任务通知。<br>沿用官方：模型选择、MCP 配置、会话文件记录与 diff 展示。</div>'
   scroll.append(statusSection.root)
   return panel
 }
@@ -492,6 +488,7 @@ function installTaskObserver(): void {
 
 async function initialize(): Promise<void> {
   if (document.getElementById('will-titlebar') !== null) return
+  document.documentElement.dataset.willPlatform = process.platform
   installStyles()
   const titlebar = createTitlebar()
   const state = await invoke<DesktopState>('will:get-state')

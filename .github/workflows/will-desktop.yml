@@ -87,17 +87,111 @@ jobs:
             apps/will-desktop/release/latest.yml
           if-no-files-found: error
 
-      - name: Publish tagged GitHub Release
-        if: startsWith(github.ref, 'refs/tags/will-v')
+
+  macos:
+    name: macOS ${{ matrix.arch }} DMG
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+            node_platform: darwin-arm64
+          - arch: x64
+            runner: macos-15-intel
+            node_platform: darwin-x64
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install immutable workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Build official Harness and Will shell
+        run: |
+          pnpm run build
+          pnpm --filter @deepseek-harness-will/desktop run build
+
+      - name: Test Will customizations
+        run: pnpm --filter @deepseek-harness-will/desktop run test
+
+      - name: Provision verified standalone Node and npm
+        run: |
+          archive="node-v${NODE_VERSION}-${{ matrix.node_platform }}.tar.gz"
+          base="https://nodejs.org/dist/v${NODE_VERSION}"
+          download="$RUNNER_TEMP/$archive"
+          checksums="$RUNNER_TEMP/SHASUMS256.txt"
+          destination="$GITHUB_WORKSPACE/apps/will-desktop/runtime/node"
+          curl --fail --location --output "$download" "$base/$archive"
+          curl --fail --location --output "$checksums" "$base/SHASUMS256.txt"
+          expected="$(awk -v archive="$archive" '$2 == archive { print $1 }' "$checksums")"
+          test -n "$expected"
+          actual="$(shasum -a 256 "$download" | awk '{ print $1 }')"
+          test "$actual" = "$expected"
+          mkdir -p "$destination"
+          tar -xzf "$download" --strip-components=1 -C "$destination"
+          "$destination/bin/node" --version
+          "$destination/bin/npm" --version
+
+      - name: Package unsigned macOS artifact
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never
+
+      - name: Smoke-test packaged macOS application
+        run: |
+          executable="apps/will-desktop/release/mac-${{ matrix.arch }}/DeepSeek Harness Will.app/Contents/MacOS/DeepSeek Harness Will"
+          smoke="$RUNNER_TEMP/will-smoke.json"
+          data="$RUNNER_TEMP/will-smoke-data"
+          WILL_DATA_DIR="$data" WILL_SMOKE_FILE="$smoke" WILL_SMOKE_EXIT=1 "$executable" &
+          pid=$!
+          for attempt in {1..90}; do
+            if test -f "$smoke"; then break; fi
+            if ! kill -0 "$pid" 2>/dev/null; then break; fi
+            sleep 2
+          done
+          test -f "$smoke"
+          node -e 'const result = require(process.argv[1]); if (result.status !== "ready") throw new Error(JSON.stringify(result))' "$smoke"
+          wait "$pid"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeepSeek-Harness-Will-macOS-${{ matrix.arch }}
+          path: apps/will-desktop/release/DeepSeek-Harness-Will-*-macOS-${{ matrix.arch }}.dmg
+          if-no-files-found: error
+
+  release:
+    name: Publish tagged GitHub Release
+    if: startsWith(github.ref, 'refs/tags/will-v')
+    needs: [windows-x64, macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: DeepSeek-Harness-Will-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub Release with Windows and macOS assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $assets = Get-ChildItem 'apps/will-desktop/release' -File |
-            Where-Object {
-              $_.Name -eq 'latest.yml' -or
-              $_.Name -like 'DeepSeek-Harness-Will-*.exe' -or
-              $_.Name -like 'DeepSeek-Harness-Will-*.exe.blockmap'
-            } |
-            ForEach-Object { $_.FullName }
-          if ($assets.Count -eq 0) { throw 'No release assets were produced' }
-          gh release create $env:GITHUB_REF_NAME $assets --verify-tag --generate-notes --title "DeepSeek Harness Will $env:GITHUB_REF_NAME"
+          version="${GITHUB_REF_NAME#will-v}"
+          gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --notes-file .github/release-notes/current.txt --title "DeepSeek Harness Will v$version"

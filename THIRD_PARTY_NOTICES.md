@@ -38,6 +38,8 @@ External packages that a workspace package resolves at runtime. The tier covers 
 | [`@earendil-works/pi-ai`](https://github.com/earendil-works/pi) | MIT |
 | [`@joplin/turndown-plugin-gfm`](https://github.com/laurent22/joplin-turndown-plugin-gfm) | MIT |
 | [`@jridgewell/gen-mapping`](https://github.com/jridgewell/sourcemaps) | MIT |
+| [`@koromix/koffi-darwin-arm64`](https://github.com/Koromix/koffi) | MIT |
+| [`@koromix/koffi-darwin-x64`](https://github.com/Koromix/koffi) | MIT |
 | [`@koromix/koffi-win32-x64`](https://github.com/Koromix/koffi) | MIT |
 | [`@modelcontextprotocol/sdk`](https://github.com/modelcontextprotocol/typescript-sdk) | MIT |
 | [`@opentelemetry/api`](https://github.com/open-telemetry/opentelemetry-js) | Apache-2.0 |
@@ -51,6 +53,8 @@ External packages that a workspace package resolves at runtime. The tier covers 
 | [`@tanstack/react-virtual`](https://github.com/TanStack/virtual) | MIT |
 | [`@types/mdast`](https://github.com/DefinitelyTyped/DefinitelyTyped) | MIT |
 | [`@vscode/ripgrep`](https://github.com/microsoft/vscode-ripgrep) | MIT |
+| [`@vscode/ripgrep-darwin-arm64`](https://github.com/microsoft/vscode-ripgrep) | MIT |
+| [`@vscode/ripgrep-darwin-x64`](https://github.com/microsoft/vscode-ripgrep) | MIT |
 | [`@vscode/ripgrep-win32-x64`](https://github.com/microsoft/vscode-ripgrep) | MIT |
 | [`anser`](https://github.com/IonicaBizau/anser) | MIT |
 | [`chokidar`](https://github.com/paulmillr/chokidar) | MIT |
@@ -78,6 +82,8 @@ External packages that a workspace package resolves at runtime. The tier covers 
 | [`micromark-util-symbol`](https://github.com/micromark/micromark/tree/main/packages/micromark-util-symbol) | MIT |
 | [`micromark-util-types`](https://github.com/micromark/micromark/tree/main/packages/micromark-util-types) | MIT |
 | [`node-addon-require-builtin`](https://www.npmjs.com/package/node-addon-require-builtin) | MIT |
+| [`node-addon-require-builtin-darwin-arm64`](https://www.npmjs.com/package/node-addon-require-builtin-darwin-arm64) | MIT |
+| [`node-addon-require-builtin-darwin-x64`](https://www.npmjs.com/package/node-addon-require-builtin-darwin-x64) | MIT |
 | [`node-addon-require-builtin-win32-x64-msvc`](https://www.npmjs.com/package/node-addon-require-builtin-win32-x64-msvc) | MIT |
 | [`node-pty`](https://github.com/microsoft/node-pty) | MIT |
 | [`picomatch`](https://github.com/micromatch/picomatch) | MIT |

@@ -104,12 +104,14 @@ async function loadHarnessUrl(url: string): Promise<void> {
 }
 
 function createWindow(): BrowserWindow {
+  const isMac = process.platform === 'darwin'
   const window = new BrowserWindow({
     width: 1440,
     height: 920,
     minWidth: 980,
     minHeight: 640,
-    frame: false,
+    frame: isMac,
+    ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 } } : {}),
     show: false,
     backgroundColor: '#0b1118',
     webPreferences: {
@@ -142,7 +144,9 @@ function createWindow(): BrowserWindow {
 
 async function trayImage() {
   const svg = await readFile(join(app.getAppPath(), 'assets', 'icon.svg'), 'utf8')
-  return nativeImage.createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`).resize({ width: 18, height: 18 })
+  const image = nativeImage.createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`).resize({ width: 18, height: 18 })
+  if (process.platform === 'darwin') image.setTemplateImage(true)
+  return image
 }
 
 function refreshTrayMenu(): void {
@@ -285,6 +289,9 @@ function setupIpc(): void {
   ipcMain.handle('will:check-client-update', async (event): Promise<ClientUpdateResult> => {
     assertTrustedSender(event)
     if (!app.isPackaged) return { status: 'not-configured', message: '开发模式不检查客户端更新' }
+    if (process.platform === 'darwin') {
+      return { status: 'not-configured', message: 'macOS 版本当前请从 GitHub Releases 手动更新' }
+    }
     try {
       autoUpdater.autoDownload = false
       autoUpdater.autoInstallOnAppQuit = false
@@ -303,6 +310,7 @@ function setupIpc(): void {
   ipcMain.handle('will:install-client-update', async (event) => {
     assertTrustedSender(event)
     if (!app.isPackaged) throw new Error('开发模式不能安装客户端更新')
+    if (process.platform === 'darwin') throw new Error('macOS 版本当前请从 GitHub Releases 手动更新')
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
     status({ kind: 'updating-client', message: '正在下载客户端更新…' })

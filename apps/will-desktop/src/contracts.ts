@@ -45,6 +45,14 @@ export interface OperationStatus {
   message: string
 }
 
+/** Replayable state for the desktop-owned terminal process. */
+export interface TerminalSnapshot {
+  cwd: string
+  output: string
+  running: boolean
+  shell: string
+}
+
 /** Supported chrome actions from the isolated preload script. */
 export type WindowAction = 'minimize' | 'toggle-maximize' | 'close' | 'show'
 
