@@ -197,7 +197,7 @@ jobs:
           # node-gyp generates the relative node-addon-api make fragments. Force
           # a source rebuild to materialize that graph before compiling it again
           # under the older manylinux userspace.
-          npm_config_build_from_source=true pnpm rebuild node-pty
+          npm_config_build_from_source=true pnpm --filter @deepseek-ai/dsh-subprocess-local rebuild node-pty
           addon_dir="$(realpath packages/subprocess/subprocess-local/node_modules/node-pty)"
           addon="$addon_dir/build/Release/pty.node"
           [ -f "$addon_dir/build/Makefile" ] || {
