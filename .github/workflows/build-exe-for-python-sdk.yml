@@ -193,10 +193,11 @@ jobs:
             ARM64) image=quay.io/pypa/manylinux_2_28_aarch64 ;;
             *) echo "::error::Unsupported Linux runner architecture $RUNNER_ARCH"; exit 1 ;;
           esac
-          # A restored pnpm side-effects cache can carry node-gyp output whose
-          # relative node-addon-api fragment was not linked in this checkout.
-          # Replay the lifecycle before rebuilding the addon in manylinux.
-          pnpm rebuild node-pty
+          # node-pty normally accepts its bundled Linux prebuild and exits before
+          # node-gyp generates the relative node-addon-api make fragments. Force
+          # a source rebuild to materialize that graph before compiling it again
+          # under the older manylinux userspace.
+          npm_config_build_from_source=true pnpm rebuild node-pty
           addon_dir="$(realpath packages/subprocess/subprocess-local/node_modules/node-pty)"
           addon="$addon_dir/build/Release/pty.node"
           [ -f "$addon_dir/build/Makefile" ] || {
