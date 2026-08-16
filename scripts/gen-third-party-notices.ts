@@ -75,6 +75,13 @@ const OVERRIDES: Record<string, { license?: string; repo?: string }> = {
   '@modelcontextprotocol/server-filesystem': { license: 'MIT / Apache-2.0', repo: 'https://github.com/modelcontextprotocol/servers' },
   // No repository field in the published manifest.
   'node-addon-require-builtin': { repo: 'https://www.npmjs.com/package/node-addon-require-builtin' },
+  // Windows-only optional packages are absent from non-Windows pnpm stores.
+  '@koromix/koffi-win32-x64': { license: 'MIT', repo: 'https://github.com/Koromix/koffi' },
+  '@vscode/ripgrep-win32-x64': { license: 'MIT', repo: 'https://github.com/microsoft/vscode-ripgrep' },
+  'node-addon-require-builtin-win32-x64-msvc': {
+    license: 'MIT',
+    repo: 'https://www.npmjs.com/package/node-addon-require-builtin-win32-x64-msvc',
+  },
 }
 
 /**

@@ -1,0 +1,100 @@
+{
+  "name": "@deepseek-harness-will/desktop",
+  "version": "0.1.0",
+  "description": "A portable desktop distribution of DeepSeek Harness with opt-in Will customizations",
+  "author": "DeepSeek Harness Will contributors",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc --noEmit",
+    "icon:render": "node scripts/render-icon.mjs",
+    "test": "vitest run",
+    "dev": "pnpm run build && electron .",
+    "package:dir": "pnpm run build && electron-builder --dir",
+    "package:win": "pnpm run build && electron-builder --win nsis portable --x64"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "workspace:^",
+    "electron-updater": "6.6.3",
+    "js-yaml": "^4.2.0",
+    "pnpm": "11.7.0"
+  },
+  "optionalDependencies": {
+    "@koromix/koffi-win32-x64": "3.1.1",
+    "@vscode/ripgrep-win32-x64": "1.18.0",
+    "node-addon-require-builtin-win32-x64-msvc": "0.1.4"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.20.0",
+    "electron": "43.2.0",
+    "electron-builder": "26.15.7",
+    "esbuild": "^0.25.12",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "build": {
+    "appId": "org.deepseek-harness-will.desktop",
+    "productName": "DeepSeek Harness Will",
+    "artifactName": "DeepSeek-Harness-Will-${version}-${arch}.${ext}",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/**/*.node",
+      "node_modules/**/spawn-helper"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "runtime",
+        "to": "runtime",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "assets/app-update.yml",
+        "to": "app-update.yml"
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "vagaryyuofficial",
+        "repo": "DeepSeek-Harness-Will"
+      }
+    ],
+    "win": {
+      "icon": "assets/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

@@ -1,0 +1,4 @@
+provider: github
+owner: vagaryyuofficial
+repo: DeepSeek-Harness-Will
+updaterCacheDirName: deepseek-harness-will-updater

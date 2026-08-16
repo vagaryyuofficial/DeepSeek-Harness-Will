@@ -1,0 +1,98 @@
+name: DeepSeek Harness Will desktop
+
+on:
+  push:
+    branches: [main]
+    tags: ['will-v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: '24.18.0'
+  PNPM_VERSION: '11.7.0'
+  DSH_TELEMETRY_DISABLED: '1'
+
+jobs:
+  windows-x64:
+    name: Windows 10/11 x64 portable and installer
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install immutable workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Build official Harness and Will shell
+        run: |
+          pnpm run build
+          pnpm --filter @deepseek-harness-will/desktop run build
+
+      - name: Test Will customizations
+        run: pnpm --filter @deepseek-harness-will/desktop run test
+
+      - name: Provision verified standalone Node and npm
+        run: |
+          $archive = "node-v$env:NODE_VERSION-win-x64.zip"
+          $base = "https://nodejs.org/dist/v$env:NODE_VERSION"
+          $download = Join-Path $env:RUNNER_TEMP $archive
+          $checksums = Join-Path $env:RUNNER_TEMP 'SHASUMS256.txt'
+          $extract = Join-Path $env:RUNNER_TEMP 'will-node'
+          $destination = Join-Path $env:GITHUB_WORKSPACE 'apps/will-desktop/runtime/node'
+          Invoke-WebRequest -Uri "$base/$archive" -OutFile $download
+          Invoke-WebRequest -Uri "$base/SHASUMS256.txt" -OutFile $checksums
+          $match = Select-String -Path $checksums -Pattern "  $([regex]::Escape($archive))$"
+          if ($null -eq $match) { throw "Node checksum entry is missing for $archive" }
+          $expected = ($match.Line -split '\s+')[0].ToLowerInvariant()
+          $actual = (Get-FileHash -Algorithm SHA256 $download).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) { throw "Node checksum mismatch: expected $expected, got $actual" }
+          Expand-Archive -Path $download -DestinationPath $extract
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          Copy-Item -Path (Join-Path $extract "node-v$env:NODE_VERSION-win-x64/*") -Destination $destination -Recurse -Force
+          & (Join-Path $destination 'node.exe') --version
+          & (Join-Path $destination 'npm.cmd') --version
+
+      - name: Package unsigned Windows artifacts
+        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --win nsis portable --x64 --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeepSeek-Harness-Will-windows-x64
+          path: |
+            apps/will-desktop/release/*.exe
+            apps/will-desktop/release/*.yml
+            apps/will-desktop/release/*.blockmap
+          if-no-files-found: error
+
+      - name: Publish tagged GitHub Release
+        if: startsWith(github.ref, 'refs/tags/will-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = Get-ChildItem 'apps/will-desktop/release' -File |
+            Where-Object { $_.Extension -in '.exe', '.yml', '.blockmap' } |
+            ForEach-Object { $_.FullName }
+          if ($assets.Count -eq 0) { throw 'No release assets were produced' }
+          gh release create $env:GITHUB_REF_NAME $assets --verify-tag --generate-notes --title "DeepSeek Harness Will $env:GITHUB_REF_NAME"

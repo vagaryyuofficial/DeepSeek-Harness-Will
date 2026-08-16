@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">DeepSeek Harness Will</title>
+  <desc id="desc">An abstract W joined by harness nodes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071827"/>
+      <stop offset="1" stop-color="#123d59"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5ce1e6"/>
+      <stop offset="1" stop-color="#7cf6bd"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M92 142l74 230 90-174 90 174 74-230" fill="none" stroke="url(#line)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#eaffff" stroke="#1e6d7e" stroke-width="10">
+    <circle cx="92" cy="142" r="24"/>
+    <circle cx="166" cy="372" r="24"/>
+    <circle cx="256" cy="198" r="24"/>
+    <circle cx="346" cy="372" r="24"/>
+    <circle cx="420" cy="142" r="24"/>
+  </g>
+</svg>
