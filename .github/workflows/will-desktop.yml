@@ -81,9 +81,10 @@ jobs:
         with:
           name: DeepSeek-Harness-Will-windows-x64
           path: |
-            apps/will-desktop/release/*.exe
-            apps/will-desktop/release/*.yml
-            apps/will-desktop/release/*.blockmap
+            apps/will-desktop/release/DeepSeek-Harness-Will-Setup-*.exe
+            apps/will-desktop/release/DeepSeek-Harness-Will-Setup-*.exe.blockmap
+            apps/will-desktop/release/DeepSeek-Harness-Will-Portable-*.exe
+            apps/will-desktop/release/latest.yml
           if-no-files-found: error
 
       - name: Publish tagged GitHub Release
@@ -92,7 +93,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $assets = Get-ChildItem 'apps/will-desktop/release' -File |
-            Where-Object { $_.Extension -in '.exe', '.yml', '.blockmap' } |
+            Where-Object {
+              $_.Name -eq 'latest.yml' -or
+              $_.Name -like 'DeepSeek-Harness-Will-*.exe' -or
+              $_.Name -like 'DeepSeek-Harness-Will-*.exe.blockmap'
+            } |
             ForEach-Object { $_.FullName }
           if ($assets.Count -eq 0) { throw 'No release assets were produced' }
           gh release create $env:GITHUB_REF_NAME $assets --verify-tag --generate-notes --title "DeepSeek Harness Will $env:GITHUB_REF_NAME"

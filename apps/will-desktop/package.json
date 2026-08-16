@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-harness-will/desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A portable desktop distribution of DeepSeek Harness with opt-in Will customizations",
   "author": "DeepSeek Harness Will contributors",
   "private": true,
@@ -38,7 +38,6 @@
   "build": {
     "appId": "org.deepseek-harness-will.desktop",
     "productName": "DeepSeek Harness Will",
-    "artifactName": "DeepSeek-Harness-Will-${version}-${arch}.${ext}",
     "asar": true,
     "asarUnpack": [
       "node_modules/**/*.node",
@@ -90,11 +89,15 @@
       ]
     },
     "nsis": {
+      "artifactName": "DeepSeek-Harness-Will-Setup-${version}-${arch}.${ext}",
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "DeepSeek-Harness-Will-Portable-${version}-${arch}.${ext}"
     }
   }
 }
