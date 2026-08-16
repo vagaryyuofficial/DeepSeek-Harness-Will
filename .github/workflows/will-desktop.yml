@@ -98,9 +98,11 @@ jobs:
           - arch: arm64
             runner: macos-15
             node_platform: darwin-arm64
+            output_dir: mac-arm64
           - arch: x64
             runner: macos-15-intel
             node_platform: darwin-x64
+            output_dir: mac
 
     steps:
       - uses: actions/checkout@v6
@@ -152,7 +154,7 @@ jobs:
 
       - name: Verify packaged macOS application
         run: |
-          bundle="apps/will-desktop/release/mac-${{ matrix.arch }}/DeepSeek Harness Will.app"
+          bundle="apps/will-desktop/release/${{ matrix.output_dir }}/DeepSeek Harness Will.app"
           executable="$bundle/Contents/MacOS/DeepSeek Harness Will"
           runtime="$bundle/Contents/Resources/runtime/node/bin/node"
           plist="$bundle/Contents/Info.plist"
