@@ -40,3 +40,4 @@ Will 发行版需要把官方 DeepSeek Harness Web profile 封装为双击即用
 - agent overlay 只保留一个上一版本；没有 overlay 时，内置版本是最终 fallback。
 - 插件安装和 agent 更新需要网络访问，并会执行受信任 package 的代码。
 - 本决策不提供逐文件变更还原或 Codex/Claude 自动迁移；它们需要显式 host API，而不是 renderer 侧文件系统捷径。
+- 公开发行文档采用完整中英文对照，并使用从源码推导的 SVG 说明图展示能力、控制中心结构、主题、平台与信任边界。图片标题必须区分结构示意和运行截图，已实现/规划矩阵也必须持续与桌面 contracts 对齐。

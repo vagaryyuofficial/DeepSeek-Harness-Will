@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" role="img" aria-labelledby="title desc">
+  <title id="title">Deepseek Harness Will 运行架构</title>
+  <desc id="desc">展示 Electron、官方 dsh web、独立运行时、本地数据与外部服务之间的安全边界。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07141f"/><stop offset="1" stop-color="#102b36"/></linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 10 5 0 10z" fill="#66d8bd"/></marker>
+  </defs>
+  <rect width="1400" height="720" rx="34" fill="url(#bg)"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, sans-serif">
+    <text x="700" y="66" text-anchor="middle" font-size="34" font-weight="800" fill="#f2fbff">运行架构与安全边界 · Runtime architecture &amp; trust boundaries</text>
+    <rect x="56" y="112" width="928" height="532" rx="28" fill="#0d2631" stroke="#2c5664" stroke-width="2"/>
+    <text x="84" y="148" font-size="16" font-weight="750" fill="#98d9ca">本机 · Local machine</text>
+
+    <rect x="98" y="186" width="310" height="150" rx="20" fill="#173744" stroke="#3b7282"/>
+    <text x="253" y="224" text-anchor="middle" font-size="22" font-weight="800" fill="#effbff">Electron 主进程</text><text x="253" y="251" text-anchor="middle" font-size="15" fill="#9ebcc7">Electron main process</text>
+    <text x="126" y="286" font-size="13" fill="#c8dce3">窗口 · 托盘 · 通知 · 生命周期</text><text x="126" y="309" font-size="12" fill="#829faa">Window · tray · notifications · lifecycle</text>
+
+    <rect x="512" y="186" width="388" height="150" rx="20" fill="#173744" stroke="#3b7282"/>
+    <text x="706" y="224" text-anchor="middle" font-size="22" font-weight="800" fill="#effbff">官方 @deepseek-ai/dsh web</text><text x="706" y="251" text-anchor="middle" font-size="15" fill="#9ebcc7">Official Web profile</text>
+    <text x="548" y="286" font-size="13" fill="#c8dce3">127.0.0.1 临时端口 · 上游 Web UI</text><text x="548" y="309" font-size="12" fill="#829faa">Ephemeral loopback port · upstream UI</text>
+    <path d="M408 262h94" stroke="#66d8bd" stroke-width="3" marker-end="url(#arrow)"/><text x="455" y="248" text-anchor="middle" font-size="11" fill="#8fd8c6">启动 / spawn</text>
+
+    <rect x="98" y="404" width="252" height="154" rx="20" fill="#132f3a" stroke="#315f6c"/>
+    <text x="224" y="440" text-anchor="middle" font-size="19" font-weight="750" fill="#effbff">独立 Node/npm</text><text x="224" y="465" text-anchor="middle" font-size="14" fill="#9ebcc7">Verified runtime</text>
+    <text x="122" y="499" font-size="12" fill="#bfd6dd">SHA-256 校验 · 架构匹配</text><text x="122" y="523" font-size="12" fill="#829faa">Agent overlay updates</text>
+    <path d="M224 404v-58" stroke="#66d8bd" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="382" y="404" width="252" height="154" rx="20" fill="#132f3a" stroke="#315f6c"/>
+    <text x="508" y="440" text-anchor="middle" font-size="19" font-weight="750" fill="#effbff">本地数据</text><text x="508" y="465" text-anchor="middle" font-size="14" fill="#9ebcc7">Local data</text>
+    <text x="406" y="499" font-size="12" fill="#bfd6dd">DSH_HOME · 设置 · soul.md</text><text x="406" y="523" font-size="12" fill="#829faa">Sessions · preferences · overlay</text>
+    <path d="M508 404v-58" stroke="#66d8bd" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="666" y="404" width="234" height="154" rx="20" fill="#132f3a" stroke="#315f6c"/>
+    <text x="783" y="440" text-anchor="middle" font-size="19" font-weight="750" fill="#effbff">持久终端</text><text x="783" y="465" text-anchor="middle" font-size="14" fill="#9ebcc7">Persistent terminal</text>
+    <text x="690" y="499" font-size="12" fill="#bfd6dd">PowerShell / login shell</text><text x="690" y="523" font-size="12" fill="#829faa">128 KiB output replay</text>
+    <path d="M783 404v-58" stroke="#66d8bd" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="1040" y="172" width="304" height="188" rx="24" fill="#182f3a" stroke="#836b43" stroke-width="2"/>
+    <text x="1192" y="212" text-anchor="middle" font-size="21" font-weight="800" fill="#fff7dc">外部服务 · External</text>
+    <text x="1074" y="252" font-size="14" fill="#e7d7ac">模型提供商 / Model providers</text><text x="1074" y="284" font-size="14" fill="#e7d7ac">DeepSeek 余额 API / Balance API</text><text x="1074" y="316" font-size="14" fill="#e7d7ac">GitHub Releases / Updates</text>
+    <path d="M900 260h130" stroke="#d6af62" stroke-width="3" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+
+    <rect x="1040" y="410" width="304" height="160" rx="24" fill="#182f3a" stroke="#6f5e81" stroke-width="2"/>
+    <text x="1192" y="450" text-anchor="middle" font-size="21" font-weight="800" fill="#f6eaff">信任边界 · Trust rules</text>
+    <text x="1074" y="488" font-size="13" fill="#dacbe4">IPC 仅接受精确 loopback origin</text><text x="1074" y="516" font-size="13" fill="#dacbe4">Context isolation; no Node integration</text><text x="1074" y="544" font-size="13" fill="#dacbe4">API Key 不穿过 renderer IPC</text>
+    <path d="M900 490h130" stroke="#b79acc" stroke-width="3" stroke-dasharray="8 8" marker-end="url(#arrow)"/>
+    <text x="700" y="688" text-anchor="middle" font-size="14" fill="#82a7b3">Will 保持官方 Web profile 为核心，桌面能力位于隔离壳层 · Will keeps the official Web profile at its core and isolates desktop additions in the shell.</text>
+  </g>
+</svg>

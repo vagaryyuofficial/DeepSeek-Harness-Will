@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620" role="img" aria-labelledby="title desc">
+  <title id="title">Deepseek Harness Will — 组装未来</title>
+  <desc id="desc">双语项目横幅，展示 Windows 与 macOS 桌面发行版定位。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07131f"/>
+      <stop offset="0.55" stop-color="#102b3b"/>
+      <stop offset="1" stop-color="#173d44"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#63e6be"/>
+      <stop offset="1" stop-color="#61dafb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="620" rx="36" fill="url(#bg)"/>
+  <circle cx="1260" cy="72" r="240" fill="#61dafb" opacity="0.07"/>
+  <circle cx="1050" cy="640" r="320" fill="#63e6be" opacity="0.06"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, sans-serif">
+    <rect x="72" y="62" width="134" height="38" rx="19" fill="#163d48" stroke="#4bb9ad"/>
+    <text x="139" y="87" text-anchor="middle" font-size="18" font-weight="700" fill="#a9f5e5">v0.1.3</text>
+    <text x="72" y="172" font-size="52" font-weight="800" fill="#f5fbff">Deepseek Harness Will</text>
+    <text x="72" y="238" font-size="50" font-weight="800" fill="url(#accent)">组装未来</text>
+    <text x="72" y="302" font-size="25" fill="#d9eaf1">把官方 DeepSeek Harness 装进真正的桌面应用</text>
+    <text x="72" y="340" font-size="21" fill="#9fc0cd">The official Harness workflow, packaged for the desktop.</text>
+
+    <g transform="translate(72 392)">
+      <rect width="184" height="52" rx="14" fill="#eff7fa"/>
+      <text x="92" y="34" text-anchor="middle" font-size="19" font-weight="700" fill="#102631">Windows 10/11</text>
+      <rect x="200" width="206" height="52" rx="14" fill="#eff7fa"/>
+      <text x="303" y="34" text-anchor="middle" font-size="19" font-weight="700" fill="#102631">macOS 12+</text>
+    </g>
+    <text x="72" y="494" font-size="20" font-weight="650" fill="#b9dbe3">免装 Node.js · 双击即用 · 内置官方 dsh · 数据留在本机</text>
+    <text x="72" y="530" font-size="18" fill="#86aab7">No Node setup · One-click launch · Bundled official dsh · Local-first data</text>
+    <text x="72" y="574" font-size="15" fill="#6d939f">Unofficial, community-maintained desktop distribution · 非官方社区桌面发行版</text>
+
+    <g transform="translate(770 90)" filter="url(#shadow)">
+      <rect width="560" height="438" rx="24" fill="#f5f7f9" stroke="#557381" stroke-width="2"/>
+      <rect width="560" height="48" rx="24" fill="#11232d"/>
+      <rect y="24" width="560" height="24" fill="#11232d"/>
+      <circle cx="24" cy="24" r="6" fill="#ff5f57"/>
+      <circle cx="44" cy="24" r="6" fill="#febc2e"/>
+      <circle cx="64" cy="24" r="6" fill="#28c840"/>
+      <text x="92" y="30" font-size="14" font-weight="700" fill="#e7f6fb">Deepseek Harness Will — 组装未来</text>
+      <rect x="426" y="11" width="56" height="26" rx="8" fill="#1d414d"/>
+      <text x="454" y="29" text-anchor="middle" font-size="12" fill="#bceee3">余额</text>
+      <rect x="490" y="11" width="58" height="26" rx="8" fill="#2a766e"/>
+      <text x="519" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">设置</text>
+
+      <rect y="48" width="154" height="390" fill="#e9eef1"/>
+      <rect x="14" y="72" width="126" height="38" rx="10" fill="#cfe9e4"/>
+      <text x="32" y="97" font-size="14" font-weight="700" fill="#16342f">新建会话</text>
+      <text x="22" y="144" font-size="12" fill="#6d7d85">今天 / Today</text>
+      <rect x="14" y="158" width="126" height="54" rx="10" fill="#fff"/>
+      <text x="26" y="181" font-size="12" font-weight="700" fill="#253840">README 规划</text>
+      <text x="26" y="199" font-size="10" fill="#71828a">刚刚 · just now</text>
+
+      <text x="184" y="92" font-size="18" font-weight="750" fill="#182b34">准备好组装下一种未来了吗？</text>
+      <text x="184" y="120" font-size="14" fill="#607781">What would you like the agent to build?</text>
+      <rect x="184" y="154" width="342" height="94" rx="16" fill="#e4f4f0"/>
+      <text x="204" y="184" font-size="13" fill="#294840">读取项目并完善中英文 README，</text>
+      <text x="204" y="207" font-size="13" fill="#294840">不要修改与发行版无关的文件。</text>
+      <text x="204" y="230" font-size="11" fill="#5c7e75">Read the project and improve its bilingual README.</text>
+
+      <rect x="184" y="270" width="342" height="82" rx="16" fill="#fff" stroke="#d6e0e4"/>
+      <circle cx="205" cy="291" r="7" fill="#47b69d"/>
+      <text x="222" y="296" font-size="13" font-weight="700" fill="#294048">Agent 正在工作 · Agent working</text>
+      <rect x="204" y="315" width="244" height="8" rx="4" fill="#d8e7e8"/>
+      <rect x="204" y="315" width="168" height="8" rx="4" fill="#58c9b1"/>
+      <rect x="184" y="374" width="342" height="42" rx="13" fill="#fff" stroke="#cbd9de"/>
+      <text x="203" y="400" font-size="12" fill="#87979d">输入消息 / Message the agent…</text>
+      <circle cx="501" cy="395" r="13" fill="#35a98f"/>
+      <path d="M496 395h10m-5-5 5 5-5 5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

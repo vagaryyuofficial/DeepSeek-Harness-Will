@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">组装未来控制中心界面结构示意</title>
+  <desc id="desc">根据实际桌面端代码绘制的双语控制中心结构示意图，不是运行截图。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07131f"/><stop offset="1" stop-color="#14303a"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000" flood-opacity="0.38"/></filter>
+  </defs>
+  <rect width="1400" height="900" rx="34" fill="url(#bg)"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, sans-serif">
+    <text x="700" y="62" text-anchor="middle" font-size="32" font-weight="800" fill="#f0fbff">控制中心界面结构示意 · Control center anatomy</text>
+    <text x="700" y="94" text-anchor="middle" font-size="15" fill="#86aab6">依据 apps/will-desktop/src/preload.ts 绘制 · Diagram derived from the implemented preload UI</text>
+    <g transform="translate(62 126)" filter="url(#shadow)">
+      <rect width="1276" height="700" rx="24" fill="#f6f8fa"/>
+      <rect width="1276" height="50" rx="24" fill="#0f232c"/>
+      <rect y="25" width="1276" height="25" fill="#0f232c"/>
+      <circle cx="22" cy="25" r="6" fill="#ff5f57"/><circle cx="42" cy="25" r="6" fill="#febc2e"/><circle cx="62" cy="25" r="6" fill="#28c840"/>
+      <text x="92" y="31" font-size="14" font-weight="750" fill="#e7f6fb">Deepseek Harness Will — 组装未来</text>
+      <rect x="1050" y="11" width="78" height="28" rx="8" fill="#1b3d48"/><text x="1089" y="30" text-anchor="middle" font-size="12" fill="#c4e5eb">余额 --</text>
+      <rect x="1140" y="11" width="118" height="28" rx="8" fill="#26796d"/><text x="1199" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">组装未来设置</text>
+
+      <rect y="50" width="800" height="650" fill="#edf1f3"/>
+      <rect x="0" y="50" width="180" height="650" fill="#e1e7ea"/>
+      <rect x="18" y="78" width="144" height="40" rx="10" fill="#c8e7df"/>
+      <text x="38" y="104" font-size="14" font-weight="700" fill="#153a31">＋ 新建会话</text>
+      <text x="22" y="152" font-size="12" fill="#74868e">最近会话 · Recent</text>
+      <rect x="18" y="168" width="144" height="62" rx="10" fill="#fff"/>
+      <text x="34" y="193" font-size="12" font-weight="700" fill="#253942">桌面发行版说明</text><text x="34" y="214" font-size="10" fill="#84949b">README · 刚刚</text>
+      <text x="230" y="122" font-size="24" font-weight="780" fill="#1b313a">官方 Harness 对话区</text>
+      <text x="230" y="154" font-size="15" fill="#617780">Official Harness conversation</text>
+      <rect x="230" y="196" width="500" height="104" rx="16" fill="#dff2ed"/>
+      <text x="252" y="228" font-size="14" fill="#2f5148">分析项目真实功能，并输出双语文档。</text>
+      <text x="252" y="254" font-size="13" fill="#55756d">Analyze the implemented features and write bilingual docs.</text>
+      <text x="252" y="280" font-size="11" fill="#719087">用户输入 · User message</text>
+      <rect x="230" y="330" width="500" height="190" rx="16" fill="#fff" stroke="#d3dde1"/>
+      <circle cx="254" cy="356" r="8" fill="#44b69c"/><text x="272" y="362" font-size="14" font-weight="700" fill="#273e47">Agent 回复 · Agent response</text>
+      <rect x="252" y="386" width="432" height="10" rx="5" fill="#dfe7ea"/><rect x="252" y="410" width="376" height="10" rx="5" fill="#dfe7ea"/><rect x="252" y="434" width="410" height="10" rx="5" fill="#dfe7ea"/>
+      <rect x="252" y="466" width="182" height="30" rx="8" fill="#eef3f4"/><text x="343" y="486" text-anchor="middle" font-size="11" fill="#536b74">工具调用 · Tool call</text>
+      <rect x="230" y="584" width="500" height="58" rx="16" fill="#fff" stroke="#cbd8dc"/><text x="252" y="619" font-size="13" fill="#87989e">输入消息 / Message the agent…</text>
+
+      <rect x="800" y="50" width="476" height="650" fill="#fbfcfd" stroke="#d5e0e4"/>
+      <text x="828" y="88" font-size="22" font-weight="800" fill="#1b323b">组装未来控制中心</text>
+      <text x="828" y="112" font-size="13" fill="#70838b">Will control center</text>
+      <rect x="1190" y="72" width="58" height="30" rx="8" fill="#e9eff1"/><text x="1219" y="92" text-anchor="middle" font-size="12" fill="#3d535c">关闭</text>
+
+      <rect x="824" y="140" width="428" height="134" rx="14" fill="#f2f6f7" stroke="#dbe5e8"/>
+      <text x="844" y="169" font-size="16" font-weight="750" fill="#243b44">界面皮肤 · Themes</text>
+      <text x="844" y="190" font-size="11" fill="#75888f">原生默认 + 10 套互斥配色 / Native + 10 palettes</text>
+      <g transform="translate(844 210)"><rect width="62" height="38" rx="8" fill="#fff" stroke="#bdcbd0"/><rect x="72" width="62" height="38" rx="8" fill="#245edb"/><rect x="144" width="62" height="38" rx="8" fill="#39c5bb"/><rect x="216" width="62" height="38" rx="8" fill="#d4a84b"/><rect x="288" width="62" height="38" rx="8" fill="#ff4fd8"/></g>
+
+      <rect x="824" y="290" width="208" height="108" rx="14" fill="#f2f6f7" stroke="#dbe5e8"/>
+      <text x="844" y="320" font-size="16" font-weight="750" fill="#243b44">余额 · Balance</text><text x="844" y="350" font-size="24" font-weight="800" fill="#268f78">¥ --</text><text x="844" y="377" font-size="11" fill="#75888f">密钥仅主进程读取</text>
+      <rect x="1044" y="290" width="208" height="108" rx="14" fill="#f2f6f7" stroke="#dbe5e8"/>
+      <text x="1064" y="320" font-size="16" font-weight="750" fill="#243b44">soul.md 人设</text><text x="1064" y="348" font-size="12" fill="#60747c">独立 patch · hot reload</text><rect x="1064" y="365" width="90" height="22" rx="7" fill="#d5ebe5"/><text x="1109" y="380" text-anchor="middle" font-size="10" fill="#285a4d">保存人设</text>
+
+      <rect x="824" y="414" width="428" height="112" rx="14" fill="#10232b"/>
+      <text x="844" y="443" font-size="15" font-weight="700" fill="#b7f3e4">持久终端 · Persistent terminal</text><text x="844" y="469" font-family="SFMono-Regular, Consolas, monospace" font-size="12" fill="#d6e6eb">$ echo will-ready</text><text x="844" y="493" font-family="SFMono-Regular, Consolas, monospace" font-size="12" fill="#6fe3bd">will-ready</text>
+      <rect x="824" y="542" width="208" height="118" rx="14" fill="#f2f6f7" stroke="#dbe5e8"/>
+      <text x="844" y="572" font-size="16" font-weight="750" fill="#243b44">插件 · Plugins</text><text x="844" y="598" font-size="11" fill="#75888f">安装前显示代码执行警告</text><rect x="844" y="618" width="72" height="24" rx="7" fill="#2d8f7b"/><text x="880" y="634" text-anchor="middle" font-size="10" fill="#fff">安装</text>
+      <rect x="1044" y="542" width="208" height="118" rx="14" fill="#f2f6f7" stroke="#dbe5e8"/>
+      <text x="1064" y="572" font-size="16" font-weight="750" fill="#243b44">更新 · Updates</text><text x="1064" y="598" font-size="11" fill="#75888f">agent 自检、轮换与回退</text><rect x="1064" y="618" width="82" height="24" rx="7" fill="#2d8f7b"/><text x="1105" y="634" text-anchor="middle" font-size="10" fill="#fff">检查更新</text>
+    </g>
+    <text x="700" y="866" text-anchor="middle" font-size="14" fill="#86aab6">结构示意，不含用户数据 · Structural illustration; no user data is shown</text>
+  </g>
+</svg>
