@@ -70,6 +70,8 @@ describe('CI workflow', () => {
     expect(windowsNative['runs-on']).toContain('self-hosted')
     expect(windowsNative['runs-on']).toContain('dsh-win-ci')
     expect(windowsNative['runs-on']).toContain('dsh-windows-2025-16core')
+    expect(windowsNative['runs-on']).toContain('windows-2025')
+    expect(windowsNative['runs-on']).toContain("github.repository != 'deepseek-harness/deepseek-harness'")
     expect(windowsNative.name).toBe('windows node 24 / native complete')
     expect(windowsNative.if).toBe("github.event_name == 'pull_request'")
     const nativeCommandSteps = (windowsNative.steps as unknown[]).filter((step): step is Record<string, unknown> & { run: string } => (
@@ -99,6 +101,8 @@ describe('CI workflow', () => {
       expect(job['runs-on'], `${jobName} runs-on must use the Linux failover switch`).toContain('DSH_CI_FAILOVER_LINUX')
       expect(job['runs-on'], `${jobName} runs-on must not use the Windows failover switch`).not.toContain('DSH_CI_FAILOVER_WINDOWS')
       expect(job['runs-on']).toContain('vm-backup')
+      expect(job['runs-on']).toContain('ubuntu-latest')
+      expect(job['runs-on']).toContain("github.repository != 'deepseek-harness/deepseek-harness'")
     }
     expect(aggregate['runs-on']).toContain('DSH_CI_FAILOVER_LINUX')
     expect(aggregate['runs-on']).not.toContain('DSH_CI_FAILOVER_WINDOWS')
@@ -379,14 +383,16 @@ describe('Issue lifecycle workflow', () => {
     const lifecycleJob = workflowJob(lifecycle, 'lifecycle')
     const policy = loadWorkflow('.github/workflows/issue-policy.yml')
     const policyPullRequest = workflowEvent(policy, 'pull_request')
+    const policyJob = workflowJob(policy, 'policy')
 
     expect(lifecyclePullRequest.types).not.toContain('ready_for_review')
     expect(lifecyclePullRequest.types).toContain('review_requested')
     expect(lifecycleReview.types).toEqual(['submitted'])
-    expect(lifecycleJob.if).toBe(
-      "${{ github.event_name != 'pull_request_review' || (github.event.action == 'submitted' && github.event.review.state == 'changes_requested') }}",
-    )
+    expect(lifecycleJob.if).toContain("github.repository == 'deepseek-harness/deepseek-harness'")
+    expect(lifecycleJob.if).toContain("github.event_name != 'pull_request_review'")
+    expect(lifecycleJob.if).toContain("github.event.review.state == 'changes_requested'")
     expect(policyPullRequest.types).toContain('ready_for_review')
+    expect(policyJob.if).toBe("${{ github.repository == 'deepseek-harness/deepseek-harness' }}")
   })
 })
 
