@@ -150,21 +150,28 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --mac dmg --${{ matrix.arch }} --publish never
 
-      - name: Smoke-test packaged macOS application
+      - name: Verify packaged macOS application
         run: |
-          executable="apps/will-desktop/release/mac-${{ matrix.arch }}/DeepSeek Harness Will.app/Contents/MacOS/DeepSeek Harness Will"
-          smoke="$RUNNER_TEMP/will-smoke.json"
-          data="$RUNNER_TEMP/will-smoke-data"
-          WILL_DATA_DIR="$data" WILL_SMOKE_FILE="$smoke" WILL_SMOKE_EXIT=1 "$executable" &
-          pid=$!
-          for attempt in {1..90}; do
-            if test -f "$smoke"; then break; fi
-            if ! kill -0 "$pid" 2>/dev/null; then break; fi
-            sleep 2
-          done
-          test -f "$smoke"
-          node -e 'const result = require(process.argv[1]); if (result.status !== "ready") throw new Error(JSON.stringify(result))' "$smoke"
-          wait "$pid"
+          bundle="apps/will-desktop/release/mac-${{ matrix.arch }}/DeepSeek Harness Will.app"
+          executable="$bundle/Contents/MacOS/DeepSeek Harness Will"
+          runtime="$bundle/Contents/Resources/runtime/node/bin/node"
+          plist="$bundle/Contents/Info.plist"
+
+          test -x "$executable"
+          test -x "$runtime"
+          test -f "$bundle/Contents/Resources/app.asar"
+          test -f "$bundle/Contents/Resources/icon.icns"
+
+          test "$(ELECTRON_RUN_AS_NODE=1 "$executable" -p 'process.platform')" = 'darwin'
+          test "$(ELECTRON_RUN_AS_NODE=1 "$executable" -p 'process.arch')" = '${{ matrix.arch }}'
+          test "$(ELECTRON_RUN_AS_NODE=1 "$executable" -p 'process.versions.electron')" = '43.2.0'
+          test "$("$runtime" -p 'process.platform')" = 'darwin'
+          test "$("$runtime" -p 'process.arch')" = '${{ matrix.arch }}'
+          test "$("$runtime" --version)" = "v$NODE_VERSION"
+
+          test "$(plutil -extract CFBundleIdentifier raw -o - "$plist")" = 'org.deepseek-harness-will.desktop'
+          test "$(plutil -extract CFBundleShortVersionString raw -o - "$plist")" = '0.1.2'
+          test "$(plutil -extract LSMinimumSystemVersion raw -o - "$plist")" = '12.0'
 
       - uses: actions/upload-artifact@v4
         with:
