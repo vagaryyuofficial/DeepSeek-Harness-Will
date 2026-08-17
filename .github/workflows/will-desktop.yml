@@ -206,6 +206,7 @@ jobs:
               [Parameter(Mandatory)][string] $StatusFile,
               [Parameter(Mandatory)][string] $Label,
               [ValidateRange(1, 1800)][int] $ReadyTimeoutSeconds = 120,
+              [ValidateRange(0, 1800)][int] $ReadyBudgetSeconds = 0,
               [string[]] $DiagnosticFiles = @()
             )
 
@@ -240,7 +241,11 @@ jobs:
               Start-Sleep -Milliseconds 250
               $result = Get-Content -LiteralPath $StatusFile -Raw | ConvertFrom-Json
               if ($result.status -ne 'ready') { throw "$Label reported startup failure: $($result.message)" }
-              Write-Host "$Label ready at $($result.message)"
+              $readySeconds = [math]::Round(((Get-Date) - $startedAt).TotalSeconds, 1)
+              Write-Host "$Label ready at $($result.message) in ${readySeconds}s"
+              if ($ReadyBudgetSeconds -gt 0 -and $readySeconds -gt $ReadyBudgetSeconds) {
+                throw "$Label exceeded its ${ReadyBudgetSeconds}s readiness budget (${readySeconds}s)"
+              }
 
               if (-not $launcher.HasExited -and -not $launcher.WaitForExit(30000)) {
                 throw "$Label did not exit after its successful smoke probe"
@@ -283,6 +288,7 @@ jobs:
             -StatusFile (Join-Path $smokeRoot 'portable.json') `
             -Label 'Portable wrapper' `
             -ReadyTimeoutSeconds 360 `
+            -ReadyBudgetSeconds 120 `
             -DiagnosticFiles @(
               (Join-Path $portableRoot 'DeepSeek-Harness-Will-Data/startup-error.log'),
               (Join-Path $portableExplicitData 'startup-error.log')

@@ -8,7 +8,7 @@ interface DesktopManifest {
     asarUnpack: string[]
     productName: string
     nsis: { artifactName: string }
-    portable: { artifactName: string }
+    portable: { artifactName: string; useZip: boolean }
     mac: {
       artifactName: string
       entitlements: string
@@ -22,7 +22,7 @@ interface DesktopManifest {
 }
 
 describe('desktop packaging', () => {
-  it('gives installer and portable targets distinct release names', () => {
+  it('keeps Windows targets distinct and makes Portable extraction responsive', () => {
     const manifest = JSON.parse(
       readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8'),
     ) as DesktopManifest
@@ -32,6 +32,7 @@ describe('desktop packaging', () => {
     expect(manifest.build.nsis.artifactName).toContain('Setup')
     expect(manifest.build.portable.artifactName).toContain('Portable')
     expect(manifest.build.nsis.artifactName).not.toBe(manifest.build.portable.artifactName)
+    expect(manifest.build.portable.useZip).toBe(true)
   })
 
   it('publishes installable DMGs for Apple Silicon and Intel Macs', () => {

@@ -216,7 +216,8 @@
       "createStartMenuShortcut": true
     },
     "portable": {
-      "artifactName": "DeepSeek-Harness-Will-Portable-${version}-${arch}.${ext}"
+      "artifactName": "DeepSeek-Harness-Will-Portable-${version}-${arch}.${ext}",
+      "useZip": true
     }
   }
 }
