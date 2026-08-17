@@ -1,5 +1,8 @@
 /** Release family discovery, publish order, tag naming, and the bump judgements. */
 
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { releaseFamily, type ReleaseMember } from './families.ts'
 import { compareVersions, nextVendorVersion, reachesPayload } from './bump.ts'
@@ -16,6 +19,29 @@ function member(directory: string, name: string, manifest: Record<string, unknow
 }
 
 describe('release families', () => {
+  it('excludes private workspace applications from a publish family', () => {
+    const root = mkdtempSync(join(tmpdir(), 'dsh-release-family-'))
+    try {
+      const publicDirectory = join(root, 'apps', 'cli')
+      const privateDirectory = join(root, 'apps', 'desktop')
+      mkdirSync(publicDirectory, { recursive: true })
+      mkdirSync(privateDirectory, { recursive: true })
+      writeFileSync(join(publicDirectory, 'package.json'), JSON.stringify({
+        name: '@deepseek-ai/dsh',
+        version: '0.1.0',
+      }))
+      writeFileSync(join(privateDirectory, 'package.json'), JSON.stringify({
+        name: '@downstream/desktop',
+        version: '9.9.9',
+        private: true,
+      }))
+
+      expect(releaseFamily('dsh').members(root).map(member => member.name)).toEqual(['@deepseek-ai/dsh'])
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
   it('names one tag for the whole dsh family and one per vendored package', () => {
     const dsh = releaseFamily('dsh')
     const vendor = releaseFamily('vendor')

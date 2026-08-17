@@ -1,14 +1,57 @@
-DeepSeek Harness Will v0.1.3 adopts the bilingual application name Deepseek Harness Will — 组装未来 across Windows and macOS while retaining the established repository and artifact names.
+## Deepseek Harness Will — 组装未来 v0.1.3
 
-Highlights:
-- The installed application, window, tray, notification, and shortcut name is Deepseek Harness Will — 组装未来.
-- Existing installed and portable data directories remain compatible across the name change.
-- Apple Silicon (arm64) and Intel (x64) DMGs for macOS 12 or later.
-- Native macOS traffic-light window controls, template tray icon, and persistent login-shell terminal.
-- Architecture-matched, checksum-verified Node/npm runtime in every Windows and macOS package.
-- One release workflow that builds, smoke-tests, and publishes all supported platforms together.
-- Expanded English and Chinese README with installation, usage, and real input/output examples.
+### 中文
 
-Current features include 10 optional UI skins, DeepSeek balance display, soul.md editing, plugin management, persistent terminal sessions, agent update/rollback, close-to-tray behavior, task notifications, and the official Harness model/MCP/session/file-diff UI.
+v0.1.3 将 Windows 与 macOS 安装后的应用、窗口、托盘、通知和快捷方式统一为双语显示名 **Deepseek Harness Will — 组装未来**。仓库名、安装包文件名、应用 id 与旧数据目录保持不变，因此升级不会隐藏已有设置或会话。
 
-The packages are currently unsigned. Windows may show SmartScreen, and macOS may require Control-click → Open after the download is verified. macOS client updates are manual from GitHub Releases; Windows retains consent-gated client updates.
+下载：
+
+- macOS Apple Silicon（M1 或更新）：`DeepSeek-Harness-Will-0.1.3-macOS-arm64.dmg`
+- macOS Intel：`DeepSeek-Harness-Will-0.1.3-macOS-x64.dmg`
+- Windows 10/11 x64 安装版：`DeepSeek-Harness-Will-Setup-0.1.3-x64.exe`
+- Windows 10/11 x64 便携版：`DeepSeek-Harness-Will-Portable-0.1.3-x64.exe`
+
+当前功能：
+
+- 内置官方 DeepSeek Harness 与经过 checksum 校验、匹配平台架构的 Node/npm 运行时。
+- Windows 安装版/便携版，以及 macOS Apple Silicon/Intel 原生 DMG。
+- 原生桌面窗口、单实例、系统托盘、关闭到托盘和任务完成通知。
+- 默认保持官方外观，并提供 10 套互斥的可选 CSS token 配色。
+- DeepSeek 余额查看；API Key 只在 Electron 主进程读取。
+- `soul.md` 人设编辑，通过 Will 独占 patch 投影，不覆盖上游 profile patch。
+- 持久 PowerShell/macOS 登录 Shell，跨页面刷新和托盘隐藏继续运行并回放最近输出。
+- 通过 package spec 安装/卸载 dsh 插件，安装前显示本机代码执行警告。
+- 官方 agent 事务式 overlay 更新、自检、一个版本回退。
+- Windows 客户端经用户确认后更新；macOS 从 Releases 手动下载新 DMG。
+- 直接复用官方 Harness 的模型、MCP、会话、工具调用和文件 diff 界面。
+
+尚未实现：单文件/整会话一键还原、Codex/Claude 自动迁移、搜索式插件市场、Linux 桌面安装包。
+
+### English
+
+v0.1.3 applies the bilingual display name **Deepseek Harness Will — 组装未来** to the installed application, windows, tray, notifications, and shortcuts on Windows and macOS. The repository, artifact filenames, application id, and legacy data directory remain stable, so existing settings and sessions stay visible after upgrading.
+
+Downloads:
+
+- macOS Apple Silicon (M1 or later): `DeepSeek-Harness-Will-0.1.3-macOS-arm64.dmg`
+- macOS Intel: `DeepSeek-Harness-Will-0.1.3-macOS-x64.dmg`
+- Windows 10/11 x64 Setup: `DeepSeek-Harness-Will-Setup-0.1.3-x64.exe`
+- Windows 10/11 x64 Portable: `DeepSeek-Harness-Will-Portable-0.1.3-x64.exe`
+
+Current capabilities:
+
+- Bundled official DeepSeek Harness and a checksum-verified, architecture-matched Node/npm runtime.
+- Windows Setup/Portable builds and native Apple Silicon/Intel DMGs.
+- Native desktop window, single instance, tray, close-to-tray behavior, and task-completion notifications.
+- Official appearance by default, plus 10 mutually exclusive optional CSS-token palettes.
+- DeepSeek balance display with the API key read only by the Electron main process.
+- `soul.md` persona editing projected through a Will-owned patch without overwriting the upstream profile patch.
+- Persistent PowerShell/macOS login shell that survives page reloads and tray hiding and replays recent output.
+- dsh plugin add/remove by package spec with a local-code-execution warning before installation.
+- Transactional official-agent overlay update, verification, and one-version rollback.
+- Consent-gated Windows client updates; manual DMG downloads for macOS.
+- Official Harness model, MCP, session, tool-call, and file-diff interfaces retained directly from upstream.
+
+Not implemented yet: one-click file/session restore, automatic Codex/Claude migration, a searchable plugin marketplace, and Linux desktop packages.
+
+The packages are currently unsigned. Windows may show SmartScreen, and macOS may require Control-click → Open after the download source has been verified.

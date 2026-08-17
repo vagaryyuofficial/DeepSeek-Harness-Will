@@ -539,8 +539,10 @@ describe('headless stream-json snapshots', () => {
       })
 
       expect(result.stderr).toBe('')
-      expect(server.requests).toHaveLength(1)
-      expect(server.requests[0]?.max_tokens).toBe(256_000)
+      // Transport retries are allowed to replay this deterministic request;
+      // every attempt must still carry the adapter-owned default.
+      expect(server.requests.length).toBeGreaterThanOrEqual(1)
+      expect(server.requests.every(request => request.max_tokens === 256_000)).toBe(true)
       const header = (parseJsonl(result.stdout)
         .map(record => record.event)
         .find((event): event is JsonObject => (

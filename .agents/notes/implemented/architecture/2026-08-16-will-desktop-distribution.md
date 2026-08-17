@@ -40,3 +40,4 @@ The native terminal is owned by the main process rather than the Web page. It se
 - Agent overlay rollback is bounded to one previous version. The bundled version remains the final fallback when no overlay exists.
 - Plugin installation and agent updates require network access and execute trusted package code.
 - Per-file mutation restore and automated Codex/Claude migration are not provided by this decision; they require explicit host APIs rather than renderer-side filesystem shortcuts.
+- Public distribution documentation is fully bilingual and uses source-derived SVG diagrams for capabilities, control-center structure, palettes, platforms, and trust boundaries. Diagram captions must distinguish structural illustrations from runtime screenshots, and the implemented/planned matrix must remain aligned with the desktop contracts.
