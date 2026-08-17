@@ -24,6 +24,8 @@ jobs:
   windows-x64:
     name: Windows 10/11 x64 portable and installer
     runs-on: windows-2025
+    env:
+      WILL_WINDOWS_RELEASE: D:/will-release
     defaults:
       run:
         shell: pwsh
@@ -98,18 +100,18 @@ jobs:
 
       - name: Package unsigned Windows artifacts
         if: ${{ !startsWith(github.ref, 'refs/tags/will-v') }}
-        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --win nsis portable --x64 --publish never
+        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --win nsis portable --x64 --publish never "--config.directories.output=$env:WILL_WINDOWS_RELEASE"
 
       - name: Package signed Windows release artifacts
         if: startsWith(github.ref, 'refs/tags/will-v')
         env:
           CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --win nsis portable --x64 --publish never
+        run: pnpm --filter @deepseek-harness-will/desktop exec electron-builder --win nsis portable --x64 --publish never "--config.directories.output=$env:WILL_WINDOWS_RELEASE"
 
       - name: Verify unpacked Windows runtime and Harness
         run: |
-          $release = Join-Path $env:GITHUB_WORKSPACE 'apps/will-desktop/release'
+          $release = $env:WILL_WINDOWS_RELEASE
           $unpacked = Join-Path $release 'win-unpacked'
           $productName = node -p "require('./apps/will-desktop/package.json').build.productName"
           $executable = Join-Path $unpacked "$productName.exe"
@@ -261,7 +263,7 @@ jobs:
             }
           }
 
-          $release = Join-Path $env:GITHUB_WORKSPACE 'apps/will-desktop/release'
+          $release = $env:WILL_WINDOWS_RELEASE
           $productName = node -p "require('./apps/will-desktop/package.json').build.productName"
           $smokeRoot = Join-Path $env:RUNNER_TEMP "will-shell-smoke-$([guid]::NewGuid().ToString('N'))"
           New-Item -ItemType Directory -Force -Path $smokeRoot | Out-Null
@@ -325,7 +327,7 @@ jobs:
       - name: Verify tagged Windows Authenticode signatures
         if: startsWith(github.ref, 'refs/tags/will-v')
         run: |
-          $release = Join-Path $env:GITHUB_WORKSPACE 'apps/will-desktop/release'
+          $release = $env:WILL_WINDOWS_RELEASE
           $productName = node -p "require('./apps/will-desktop/package.json').build.productName"
           $targets = @((Get-Item -LiteralPath (Join-Path $release "win-unpacked/$productName.exe")))
           $targets += @(Get-ChildItem -LiteralPath $release -Filter 'DeepSeek-Harness-Will-Setup-*.exe')
@@ -344,10 +346,10 @@ jobs:
         with:
           name: DeepSeek-Harness-Will-windows-x64
           path: |
-            apps/will-desktop/release/DeepSeek-Harness-Will-Setup-*.exe
-            apps/will-desktop/release/DeepSeek-Harness-Will-Setup-*.exe.blockmap
-            apps/will-desktop/release/DeepSeek-Harness-Will-Portable-*.exe
-            apps/will-desktop/release/latest.yml
+            D:/will-release/DeepSeek-Harness-Will-Setup-*.exe
+            D:/will-release/DeepSeek-Harness-Will-Setup-*.exe.blockmap
+            D:/will-release/DeepSeek-Harness-Will-Portable-*.exe
+            D:/will-release/latest.yml
           if-no-files-found: error
 
 
