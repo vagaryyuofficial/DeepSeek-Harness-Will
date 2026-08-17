@@ -138,13 +138,75 @@ jobs:
 
       - name: Smoke win-unpacked, Portable, and NSIS shells
         run: |
+          function Write-WillDesktopSmokeDiagnostics {
+            param(
+              [Parameter(Mandatory)][System.Diagnostics.Process] $Launcher,
+              [Parameter(Mandatory)][datetime] $StartedAt,
+              [Parameter(Mandatory)][string] $Label,
+              [string[]] $DiagnosticFiles = @()
+            )
+
+            Write-Host "::group::$Label startup diagnostics"
+            $elapsed = [math]::Round(((Get-Date) - $StartedAt).TotalSeconds, 1)
+            Write-Host "launcher pid=$($Launcher.Id) exited=$($Launcher.HasExited) elapsed=${elapsed}s"
+
+            $processes = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
+            $relatedProcessIds = @($Launcher.Id)
+            while ($true) {
+              $children = @(
+                $processes |
+                  Where-Object {
+                    $_.ParentProcessId -in $relatedProcessIds -and
+                    $_.ProcessId -notin $relatedProcessIds
+                  } |
+                  Select-Object -ExpandProperty ProcessId
+              )
+              if ($children.Count -eq 0) { break }
+              $relatedProcessIds += $children
+            }
+            $processes |
+              Where-Object { $_.ProcessId -in $relatedProcessIds } |
+              Select-Object ProcessId, ParentProcessId, Name, ExecutablePath, CommandLine |
+              Format-List |
+              Out-String -Width 4096 |
+              Write-Host
+
+            foreach ($candidate in $DiagnosticFiles) {
+              if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+                $item = Get-Item -LiteralPath $candidate
+                Write-Host "diagnostic file: $candidate ($($item.Length) bytes)"
+                Get-Content -LiteralPath $candidate -Raw -ErrorAction SilentlyContinue | Write-Host
+              } else {
+                Write-Host "diagnostic file missing: $candidate"
+              }
+            }
+
+            @($env:TEMP, $env:RUNNER_TEMP) |
+              Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+              Select-Object -Unique |
+              ForEach-Object {
+                $tempRoot = $_
+                Write-Host "recent temporary directories below $tempRoot"
+                Get-ChildItem -LiteralPath $tempRoot -Directory -Force -ErrorAction SilentlyContinue |
+                  Where-Object { $_.LastWriteTime -ge $StartedAt.AddSeconds(-5) } |
+                  Sort-Object LastWriteTime -Descending |
+                  Select-Object -First 20 FullName, LastWriteTime |
+                  Format-Table -AutoSize |
+                  Out-String -Width 4096 |
+                  Write-Host
+              }
+            Write-Host '::endgroup::'
+          }
+
           function Invoke-WillDesktopSmoke {
             param(
               [Parameter(Mandatory)][string] $Executable,
               [Parameter(Mandatory)][string] $WorkingDirectory,
               [Parameter(Mandatory)][string] $DataDirectory,
               [Parameter(Mandatory)][string] $StatusFile,
-              [Parameter(Mandatory)][string] $Label
+              [Parameter(Mandatory)][string] $Label,
+              [ValidateRange(1, 1800)][int] $ReadyTimeoutSeconds = 120,
+              [string[]] $DiagnosticFiles = @()
             )
 
             New-Item -ItemType Directory -Force -Path $WorkingDirectory, $DataDirectory | Out-Null
@@ -154,14 +216,24 @@ jobs:
             $env:WILL_DATA_DIR = $DataDirectory
             $launcher = $null
             try {
+              $artifact = Get-Item -LiteralPath $Executable
+              Write-Host "$Label starting from $Executable ($($artifact.Length) bytes; readiness timeout ${ReadyTimeoutSeconds}s)"
+              $startedAt = Get-Date
               $launcher = Start-Process -FilePath $Executable -WorkingDirectory $WorkingDirectory `
                 -ArgumentList '--disable-gpu' -PassThru
-              $deadline = (Get-Date).AddSeconds(120)
+              $deadline = $startedAt.AddSeconds($ReadyTimeoutSeconds)
               while (-not (Test-Path -LiteralPath $StatusFile -PathType Leaf)) {
                 if ($launcher.HasExited) {
                   throw "$Label exited with code $($launcher.ExitCode) before writing its smoke result"
                 }
-                if ((Get-Date) -ge $deadline) { throw "$Label did not become ready within 120 seconds" }
+                if ((Get-Date) -ge $deadline) {
+                  Write-WillDesktopSmokeDiagnostics `
+                    -Launcher $launcher `
+                    -StartedAt $startedAt `
+                    -Label $Label `
+                    -DiagnosticFiles @($StatusFile, $DiagnosticFiles)
+                  throw "$Label did not become ready within $ReadyTimeoutSeconds seconds"
+                }
                 Start-Sleep -Milliseconds 250
               }
 
@@ -209,7 +281,12 @@ jobs:
             -WorkingDirectory $portableRoot `
             -DataDirectory $portableExplicitData `
             -StatusFile (Join-Path $smokeRoot 'portable.json') `
-            -Label 'Portable wrapper'
+            -Label 'Portable wrapper' `
+            -ReadyTimeoutSeconds 360 `
+            -DiagnosticFiles @(
+              (Join-Path $portableRoot 'DeepSeek-Harness-Will-Data/startup-error.log'),
+              (Join-Path $portableExplicitData 'startup-error.log')
+            )
           $portableData = Join-Path $portableRoot 'DeepSeek-Harness-Will-Data'
           if (-not (Test-Path -LiteralPath (Join-Path $portableData 'will/soul.md') -PathType Leaf)) {
             throw "Portable wrapper did not keep its data beside the executable: $portableData"
@@ -484,7 +561,7 @@ jobs:
         run: |
           set -euo pipefail
           product_name="$(node -p "require('./apps/will-desktop/package.json').build.productName")"
-          bundle="apps/will-desktop/release/${{ matrix.output_dir }}/$product_name.app"
+          bundle="$GITHUB_WORKSPACE/apps/will-desktop/release/${{ matrix.output_dir }}/$product_name.app"
           executable="$bundle/Contents/MacOS/$product_name"
           resources="$bundle/Contents/Resources"
 
