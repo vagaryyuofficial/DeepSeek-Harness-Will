@@ -1,10 +1,10 @@
 /** Electron host for the Will desktop distribution of the official dsh Web profile. */
 
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { appendFile, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import {
-  app, BrowserWindow, ipcMain, Menu, nativeImage, Notification, shell, Tray,
+  app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, Notification, shell, Tray,
   type IpcMainInvokeEvent,
 } from 'electron'
 import updater from 'electron-updater'
@@ -34,14 +34,16 @@ const selectedDataDir = PORTABLE_DIR !== undefined && PORTABLE_DIR !== ''
 mkdirSync(selectedDataDir, { recursive: true, mode: 0o700 })
 app.setPath('userData', selectedDataDir)
 
-if (!app.requestSingleInstanceLock()) app.exit(0)
-
 let settings: DesktopSettings
 let tray: Tray | undefined
 let quitting = false
 let runtimeReady = false
 let harnessUrl = ''
 let latestStatus: OperationStatus = { kind: 'idle', message: '等待启动' }
+let paths: DesktopPaths
+let harness: HarnessProcess
+let mainWindow: BrowserWindow
+let terminal: PersistentTerminal
 
 function status(value: OperationStatus): void {
   latestStatus = value
@@ -51,6 +53,30 @@ function status(value: OperationStatus): void {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
+}
+
+async function reportFatalStartupError(error: unknown): Promise<void> {
+  const message = errorMessage(error)
+  const detail = error instanceof Error ? error.stack ?? message : message
+  let logPath: string | undefined
+  try {
+    logPath = join(app.getPath('userData'), 'startup-error.log')
+    await appendFile(logPath, `[${new Date().toISOString()}] ${APP_DISPLAY_NAME} startup failure\n${detail}\n\n`, {
+      encoding: 'utf8',
+      mode: 0o600,
+    })
+  } catch {
+    logPath = undefined
+  }
+  try {
+    dialog.showErrorBox(
+      `${APP_DISPLAY_NAME} 启动失败`,
+      `${message}${logPath === undefined ? '' : `\n\n诊断日志：${logPath}`}`,
+    )
+  } catch {
+    // The native dialog may be unavailable when Electron fails before ready.
+  }
+  app.exit(1)
 }
 
 async function finishSmokeProbe(result: { status: 'ready' | 'error'; message: string }): Promise<void> {
@@ -343,34 +369,44 @@ function setupIpc(): void {
   })
 }
 
-await app.whenReady()
-const paths: DesktopPaths = desktopPaths(app.getPath('userData'))
-await initializeDesktopFiles(paths)
-settings = await readDesktopSettings(paths)
-const harness = new HarnessProcess(paths, status)
-const mainWindow = createWindow()
-const terminal = new PersistentTerminal(process.cwd(), (text) => { mainWindow.webContents.send('will:terminal-data', text) })
-runtimeReady = true
-setupIpc()
-app.on('second-instance', () => { mainWindow.show(); mainWindow.focus() })
-app.on('before-quit', (event) => {
-  quitting = true
-  if (!runtimeReady) return
-  event.preventDefault()
-  runtimeReady = false
-  void Promise.all([harness.stop(), terminal.stop()]).finally(() => { app.quit() })
-})
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin' && !settings.closeToTray) app.quit()
-})
-app.on('activate', () => { mainWindow.show(); mainWindow.focus() })
-await createTray()
-try {
-  await loadHarnessUrl(await harness.start())
-  await finishSmokeProbe({ status: 'ready', message: harnessUrl })
-} catch (error) {
-  const message = errorMessage(error)
-  status({ kind: 'error', message })
-  await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<h1>${APP_DISPLAY_NAME} 启动失败</h1><pre>${message}</pre>`)}`)
-  await finishSmokeProbe({ status: 'error', message })
+async function boot(): Promise<void> {
+  if (!app.requestSingleInstanceLock()) {
+    app.exit(0)
+    return
+  }
+
+  await app.whenReady()
+  paths = desktopPaths(app.getPath('userData'))
+  await initializeDesktopFiles(paths)
+  settings = await readDesktopSettings(paths)
+  const workingDirectory = app.getPath('home')
+  harness = new HarnessProcess(paths, status, workingDirectory)
+  mainWindow = createWindow()
+  terminal = new PersistentTerminal(workingDirectory, (text) => { mainWindow.webContents.send('will:terminal-data', text) })
+  runtimeReady = true
+  setupIpc()
+  app.on('second-instance', () => { mainWindow.show(); mainWindow.focus() })
+  app.on('before-quit', (event) => {
+    quitting = true
+    if (!runtimeReady) return
+    event.preventDefault()
+    runtimeReady = false
+    void Promise.all([harness.stop(), terminal.stop()]).finally(() => { app.quit() })
+  })
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin' && !settings.closeToTray) app.quit()
+  })
+  app.on('activate', () => { mainWindow.show(); mainWindow.focus() })
+  await createTray()
+  try {
+    await loadHarnessUrl(await harness.start())
+    await finishSmokeProbe({ status: 'ready', message: harnessUrl })
+  } catch (error) {
+    const message = errorMessage(error)
+    status({ kind: 'error', message })
+    await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`<h1>${APP_DISPLAY_NAME} 启动失败</h1><pre>${message}</pre>`)}`)
+    await finishSmokeProbe({ status: 'error', message })
+  }
 }
+
+void boot().catch(reportFatalStartupError)

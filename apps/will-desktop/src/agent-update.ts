@@ -3,37 +3,148 @@
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rename, rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { delimiter, dirname, join } from 'node:path'
 import { app } from 'electron'
 import type { OperationStatus } from './contracts.ts'
 import type { HarnessProcess } from './harness.ts'
 import type { DesktopPaths } from './store.ts'
 
-function standaloneNode(): string {
-  const explicit = process.env.WILL_NODE_BINARY
-  if (explicit !== undefined && existsSync(explicit)) return explicit
-  const windows = join(process.resourcesPath, 'runtime', 'node', 'node.exe')
-  if (process.platform === 'win32' && existsSync(windows)) return windows
-  const posix = join(process.resourcesPath, 'runtime', 'node', 'bin', 'node')
-  if (existsSync(posix)) return posix
+interface RuntimeLayout {
+  node: string
+  npmCli: string
+  bin: string
+}
+
+interface UpdateLaunch {
+  command: string
+  args: string[]
+  pathPrefix: string
+}
+
+interface UpdateLaunches {
+  install: UpdateLaunch
+  verify: UpdateLaunch
+}
+
+function bundledRuntimeLayout(resourcesPath: string, platform: NodeJS.Platform): RuntimeLayout {
+  const root = join(resourcesPath, 'runtime', 'node')
+  return platform === 'win32'
+    ? {
+      node: join(root, 'node.exe'),
+      npmCli: join(root, 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+      bin: root,
+    }
+    : {
+      node: join(root, 'bin', 'node'),
+      npmCli: join(root, 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+      bin: join(root, 'bin'),
+    }
+}
+
+function standaloneNode(
+  layout: RuntimeLayout,
+  environment: NodeJS.ProcessEnv,
+  fileExists: (path: string) => boolean,
+): string {
+  const explicit = environment.WILL_NODE_BINARY
+  if (explicit !== undefined && fileExists(explicit)) return explicit
+  if (fileExists(layout.node)) return layout.node
   return 'node'
 }
 
-function npmCommand(): string {
-  const explicit = process.env.WILL_NPM_BINARY
-  if (explicit !== undefined && existsSync(explicit)) return explicit
-  const windows = join(process.resourcesPath, 'runtime', 'node', 'npm.cmd')
-  if (process.platform === 'win32' && existsSync(windows)) return windows
-  const posix = join(process.resourcesPath, 'runtime', 'node', 'bin', 'npm')
-  if (existsSync(posix)) return posix
-  return 'npm'
+function npmCliScript(
+  layout: RuntimeLayout,
+  node: string,
+  platform: NodeJS.Platform,
+  environment: NodeJS.ProcessEnv,
+  fileExists: (path: string) => boolean,
+): string {
+  const explicit = environment.WILL_NPM_BINARY
+  if (explicit !== undefined && fileExists(explicit)) {
+    if (platform !== 'win32' || !explicit.toLowerCase().endsWith('.cmd')) return explicit
+    const adjacent = join(dirname(explicit), 'node_modules', 'npm', 'bin', 'npm-cli.js')
+    if (fileExists(adjacent)) return adjacent
+  }
+  if (fileExists(layout.npmCli)) return layout.npmCli
+
+  if (node !== 'node') {
+    const root = platform === 'win32' ? dirname(node) : dirname(dirname(node))
+    const adjacent = platform === 'win32'
+      ? join(root, 'node_modules', 'npm', 'bin', 'npm-cli.js')
+      : join(root, 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')
+    if (fileExists(adjacent)) return adjacent
+  }
+
+  for (const bin of (environment.PATH ?? '').split(delimiter).filter(Boolean)) {
+    const adjacent = platform === 'win32'
+      ? join(bin, 'node_modules', 'npm', 'bin', 'npm-cli.js')
+      : join(dirname(bin), 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')
+    if (fileExists(adjacent)) return adjacent
+    const npm = join(bin, platform === 'win32' ? 'npm-cli.js' : 'npm')
+    if (fileExists(npm)) return npm
+  }
+  throw new Error(`未找到可由独立 Node 执行的 npm CLI：${layout.npmCli}`)
 }
 
-async function run(command: string, args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
+/**
+ * Resolve the standalone Node launch vectors used to install and verify an agent overlay.
+ * @param staging isolated overlay staging directory.
+ * @param platform target operating system.
+ * @param resourcesPath Electron resources directory.
+ * @param environment launch environment and optional runtime overrides.
+ * @param fileExists filesystem probe used while resolving the packaged toolchain.
+ * @returns npm-install and dsh-verification commands with Node before each JavaScript entry.
+ */
+export function resolveAgentUpdateLaunches(
+  staging: string,
+  platform: NodeJS.Platform = process.platform,
+  resourcesPath: string = process.resourcesPath,
+  environment: NodeJS.ProcessEnv = process.env,
+  fileExists: (path: string) => boolean = existsSync,
+): UpdateLaunches {
+  const layout = bundledRuntimeLayout(resourcesPath, platform)
+  const node = standaloneNode(layout, environment, fileExists)
+  const npmCli = npmCliScript(layout, node, platform, environment, fileExists)
+  const pathPrefix = node === 'node' ? layout.bin : dirname(node)
+  const entry = join(staging, 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js')
+  return {
+    install: {
+      command: node,
+      args: [
+        npmCli,
+        'install',
+        '--prefix', staging,
+        '--no-package-lock',
+        '--omit=dev',
+        '--no-audit',
+        '--no-fund',
+        '@deepseek-ai/dsh@latest',
+      ],
+      pathPrefix,
+    },
+    verify: {
+      command: node,
+      args: ['--expose-internals', entry, '--version'],
+      pathPrefix,
+    },
+  }
+}
+
+async function run(
+  command: string,
+  args: readonly string[],
+  cwd: string,
+  pathPrefix: string,
+): Promise<{ code: number; output: string }> {
+  const currentPath = process.env.PATH
   const child = spawn(command, [...args], {
     cwd,
-    env: { ...process.env },
-    shell: process.platform === 'win32' && command.toLowerCase().endsWith('.cmd'),
+    env: {
+      ...process.env,
+      PATH: currentPath === undefined || currentPath === ''
+        ? pathPrefix
+        : `${pathPrefix}${delimiter}${currentPath}`,
+    },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true,
   })
@@ -69,18 +180,20 @@ export async function updateAgentOverlay(
   const staging = await mkdtemp(join(paths.overlayRoot, 'staging-'))
   let rotated = false
   try {
-    const install = await run(npmCommand(), [
-      'install',
-      '--prefix', staging,
-      '--no-package-lock',
-      '--omit=dev',
-      '--no-audit',
-      '--no-fund',
-      '@deepseek-ai/dsh@latest',
-    ], paths.overlayRoot)
+    const launches = resolveAgentUpdateLaunches(staging)
+    const install = await run(
+      launches.install.command,
+      launches.install.args,
+      paths.overlayRoot,
+      launches.install.pathPrefix,
+    )
     if (install.code !== 0) throw new Error(`npm 更新失败（exit ${install.code}）\n${install.output}`)
-    const entry = join(staging, 'node_modules', '@deepseek-ai', 'dsh', 'lib', 'bin.js')
-    const verify = await run(standaloneNode(), [entry, '--version'], staging)
+    const verify = await run(
+      launches.verify.command,
+      launches.verify.args,
+      staging,
+      launches.verify.pathPrefix,
+    )
     if (verify.code !== 0) throw new Error(`新 agent 自检失败（exit ${verify.code}）\n${verify.output}`)
     const version = await installedVersion(staging)
 
@@ -110,7 +223,6 @@ export async function updateAgentOverlay(
 /** Whether this build carries the standalone Node/npm distribution used by packaged updates. */
 export function hasBundledNodeRuntime(): boolean {
   if (!app.isPackaged) return true
-  return existsSync(process.platform === 'win32'
-    ? join(process.resourcesPath, 'runtime', 'node', 'node.exe')
-    : join(process.resourcesPath, 'runtime', 'node', 'bin', 'node'))
+  const layout = bundledRuntimeLayout(process.resourcesPath, process.platform)
+  return existsSync(layout.node) && existsSync(layout.npmCli)
 }
