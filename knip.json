@@ -715,6 +715,9 @@
         "src/**/*.ts",
         "tests/**/*.ts",
         "scripts/**/*.mjs"
+      ],
+      "ignoreDependencies": [
+        "@deepseek-ai/.+"
       ]
     },
     "apps/web": {

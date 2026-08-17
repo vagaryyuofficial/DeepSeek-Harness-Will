@@ -17,6 +17,28 @@ interface LaunchSpec {
   electronAsNode: boolean
 }
 
+function bundledDependencyManifest(packageName: string): string {
+  const unpacked = join(
+    process.resourcesPath,
+    'app.asar.unpacked',
+    'node_modules',
+    ...packageName.split('/'),
+    'package.json',
+  )
+  if (existsSync(unpacked)) return unpacked
+  return packageName === 'pnpm' ? require.resolve('pnpm') : require.resolve(`${packageName}/package.json`)
+}
+
+/**
+ * Build the Node argv for a dsh invocation with internal ESM loader access enabled before the entry script.
+ * @param entry absolute dsh entry-script path.
+ * @param args dsh command arguments.
+ * @returns arguments in Node-option, entry-script, command order.
+ */
+export function dshNodeArguments(entry: string, args: readonly string[]): string[] {
+  return ['--expose-internals', entry, ...args]
+}
+
 /** Own exactly one dsh child and wait for exit during every restart or shutdown. */
 export class HarnessProcess {
   private child: ChildProcess | undefined
@@ -24,11 +46,17 @@ export class HarnessProcess {
   private readonly expectedStops = new WeakSet<ChildProcess>()
   private readonly paths: DesktopPaths
   private readonly status: (status: OperationStatus) => void
+  private readonly workingDirectory: string
 
-  /** @param paths desktop-owned runtime and data paths. @param status operation observer. */
-  constructor(paths: DesktopPaths, status: (status: OperationStatus) => void) {
+  /**
+   * @param paths desktop-owned runtime and data paths.
+   * @param status operation observer.
+   * @param workingDirectory stable user directory used instead of the launcher-inherited cwd.
+   */
+  constructor(paths: DesktopPaths, status: (status: OperationStatus) => void, workingDirectory: string) {
     this.paths = paths
     this.status = status
+    this.workingDirectory = workingDirectory
   }
 
   /** Read the version of the active overlay or bundled CLI. */
@@ -65,9 +93,12 @@ export class HarnessProcess {
       PATH: `${runtimeBin}${delimiter}${process.env.PATH ?? ''}`,
       ...(spec.electronAsNode ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
     }
-    const args = [spec.entry, 'web', '--patch', this.paths.patch, '--host', '127.0.0.1', '--port', '0']
+    const args = dshNodeArguments(
+      spec.entry,
+      ['web', '--patch', this.paths.patch, '--host', '127.0.0.1', '--port', '0'],
+    )
     const child = spawn(spec.command, args, {
-      cwd: process.cwd(),
+      cwd: this.workingDirectory,
       env,
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
@@ -144,8 +175,8 @@ export class HarnessProcess {
   async run(args: readonly string[]): Promise<{ code: number; output: string }> {
     const spec = this.launchSpec()
     const runtimeBin = await this.preparePnpmShim(spec.command, spec.electronAsNode)
-    const child = spawn(spec.command, [spec.entry, ...args], {
-      cwd: process.cwd(),
+    const child = spawn(spec.command, dshNodeArguments(spec.entry, args), {
+      cwd: this.workingDirectory,
       env: {
         ...process.env,
         DSH_HOME: this.paths.harnessHome,
@@ -171,7 +202,7 @@ export class HarnessProcess {
   }
 
   private bundledManifest(): string {
-    return require.resolve('@deepseek-ai/dsh/package.json')
+    return bundledDependencyManifest('@deepseek-ai/dsh')
   }
 
   private launchSpec(): LaunchSpec {
@@ -198,7 +229,7 @@ export class HarnessProcess {
 
   private async preparePnpmShim(nodeBinary: string, electronAsNode: boolean): Promise<string> {
     await mkdir(this.paths.runtimeBin, { recursive: true, mode: 0o700 })
-    const pnpmCli = join(dirname(require.resolve('pnpm')), 'bin', 'pnpm.mjs')
+    const pnpmCli = join(dirname(bundledDependencyManifest('pnpm')), 'bin', 'pnpm.mjs')
     if (process.platform === 'win32') {
       const shim = join(this.paths.runtimeBin, 'pnpm.cmd')
       const content = `@echo off\r\n${electronAsNode ? 'set ELECTRON_RUN_AS_NODE=1\r\n' : ''}\"${nodeBinary}\" \"${pnpmCli}\" %*\r\n`
@@ -216,10 +247,11 @@ export class HarnessProcess {
     if (child.exitCode !== null || child.signalCode !== null) return
     const exited = new Promise<void>((resolve) => { child.once('exit', () => { resolve() }) })
     child.kill('SIGTERM')
+    let timer: NodeJS.Timeout | undefined
     const graceful = await Promise.race([
       exited.then(() => true),
-      new Promise<boolean>((resolve) => { setTimeout(() => { resolve(false) }, 8_000) }),
-    ])
+      new Promise<boolean>((resolve) => { timer = setTimeout(() => { resolve(false) }, 8_000) }),
+    ]).finally(() => { clearTimeout(timer) })
     if (graceful) return
     if (process.platform === 'win32' && child.pid !== undefined) {
       const killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], { windowsHide: true, stdio: 'ignore' })
